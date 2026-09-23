@@ -1,0 +1,30 @@
+import streamlit as st
+import re
+
+st.title("Лабораторная работа №4 — Базовый уровень")
+st.header("Регистрация студента")
+
+# Создание формы
+with st.form("student_form", clear_on_submit=False):
+    full_name = st.text_input("ФИО *").strip()
+    email = st.text_input("E-mail *").strip()
+    course = st.selectbox("Курс *", ["", "1 курс", "2 курс", "3 курс", "4 курс"])
+    agreement = st.checkbox("Согласен с правилами *")
+    
+    # Кнопка отправки (в Streamlit она автоматически предотвращает перезагрузку всей страницы)
+    submitted = st.form_submit_meta = st.form_submit_button("Отправить")
+
+# Логика валидации при нажатии кнопки
+if submitted:
+    if not full_name:
+        st.error("Пожалуйста, заполните поле ФИО.")
+    elif not email:
+        st.error("Пожалуйста, укажите ваш E-mail.")
+    elif not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        st.error("Некорректный формат E-mail.")
+    elif course == "":
+        st.error("Пожалуйста, выберите курс.")
+    elif not agreement:
+        st.error("Необходимо подтвердить согласие с правилами.")
+    else:
+        st.success("Форма успешно заполнена и отправлена!")
