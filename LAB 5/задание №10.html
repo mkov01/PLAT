@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задание 10 — Список покупок</title>
+    <style>
+        :root {
+            --bg-main: #f4f6f9;
+            --bg-card: #ffffff;
+            --text-primary: #2d3748;
+            --border-color: #e2e8f0;
+            --primary: #3182ce;
+            --primary-hover: #2b6cb0;
+            --danger: #e53e3e;
+            --danger-hover: #c53030;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        h2 { font-size: 1.25rem; margin-bottom: 16px; font-weight: 700; }
+
+        .input-group { display: flex; gap: 8px; margin-bottom: 16px; }
+
+        input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition);
+        }
+        input:focus { border-color: var(--primary); }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-danger { background: var(--danger); color: white; margin-top: 16px; }
+        .btn-danger:hover { background: var(--danger-hover); }
+
+        .list {
+            list-index: none;
+            overflow-y: auto;
+            flex: 1;
+            counter-reset: shop-item;
+        }
+
+        .list-item {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.2s ease-out;
+        }
+        .list-item::before {
+            counter-increment: shop-item;
+            content: counter(shop-item) ". ";
+            font-weight: 700;
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <section class="card">
+        <h2>Список покупок</h2>
+        <div class="input-group">
+            <input type="text" id="shop-input" placeholder="Добавить товар..." autocomplete="off">
+            <button class="btn-primary" id="shop-add">Добавить</button>
+        </div>
+        <div class="list" id="shop-list"></div>
+        <button class="btn-danger" id="shop-clear">Очистить список</button>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            "use strict";
+            const input = document.getElementById("shop-input");
+            const addBtn = document.getElementById("shop-add");
+            const clearBtn = document.getElementById("shop-clear");
+            const list = document.getElementById("shop-list");
+
+            const handleCommit = () => {
+                const text = input.value.trim();
+                if (!text) return;
+
+                const node = document.createElement("div");
+                node.className = "list-item";
+                node.textContent = text; // Безопасное присвоение
+
+                list.appendChild(node);
+                input.value = "";
+                input.focus();
+            };
+
+            addBtn.addEventListener("click", handleCommit);
+            input.addEventListener("keydown", (e) => { if (e.key === "Enter") handleCommit(); });
+            clearBtn.addEventListener("click", () => { list.textContent = ""; });
+        });
+    </script>
+</body>
+</html>
