@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задание 3 — Компонент счетчика</title>
+    <style>
+        :root {
+            --bg-main: #f4f6f9;
+            --bg-card: #ffffff;
+            --text-primary: #2d3748;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --primary: #3182ce;
+            --primary-hover: #2b6cb0;
+            --danger: #e53e3e;
+            --danger-hover: #c53030;
+            --success: #38a169;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            padding: 28px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .counter-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding: 0 10px;
+        }
+
+        .display {
+            font-size: 3.5rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            transition: var(--transition);
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            background: var(--primary);
+            color: white;
+        }
+        .btn-circle:hover { background: var(--primary-hover); }
+
+        .btn-block {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: var(--danger);
+            color: white;
+        }
+        .btn-block:hover { background: var(--danger-hover); }
+    </style>
+</head>
+<body>
+
+    <section class="card" id="counter-app">
+        <h2>Интерактивный счетчик</h2>
+        <div class="counter-container">
+            <button class="btn-circle" data-action="dec">−</button>
+            <span class="display" id="counter-value">0</span>
+            <button class="btn-circle" data-action="inc">+</button>
+        </div>
+        <button class="btn-block" data-action="reset">Сбросить значение</button>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            "use strict";
+            const app = document.getElementById("counter-app");
+            const output = document.getElementById("counter-value");
+            let count = 0;
+
+            const updateUI = () => {
+                output.textContent = count;
+                output.style.color = count > 0 ? "var(--success)" : count < 0 ? "var(--danger)" : "var(--text-primary)";
+            };
+
+            app.addEventListener("click", (e) => {
+                const action = e.target.dataset.action;
+                if (!action) return;
+
+                if (action === "inc") count++;
+                else if (action === "dec") count--;
+                else if (action === "reset") count = 0;
+
+                updateUI();
+            });
+        });
+    </script>
+</body>
+</html>
