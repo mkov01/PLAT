@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задание 16 — Менеджер задач</title>
+    <style>
+        :root {
+            --bg-main: #f4f6f9;
+            --bg-card: #ffffff;
+            --text-primary: #2d3748;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --primary: #3182ce;
+            --success: #38a169;
+            --danger: #e53e3e;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        h2 { font-size: 1.25rem; margin-bottom: 16px; font-weight: 700; }
+
+        .input-group { display: flex; gap: 8px; margin-bottom: 16px; }
+
+        input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-action { padding: 6px 10px; font-size: 0.85rem; color: white; }
+
+        .list { overflow-y: auto; flex: 1; }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border-color);
+            gap: 12px;
+        }
+
+        .item-text { flex: 1; word-break: break-word; transition: var(--transition); }
+        .completed .item-text { text-decoration: line-through; color: var(--text-muted); opacity: 0.6; }
+
+        .actions { display: flex; gap: 6px; }
+
+        .footer {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <section class="card">
+        <h2>Менеджер задач</h2>
+        <div class="input-group">
+            <input type="text" id="todo-input" placeholder="Новая задача..." autocomplete="off">
+            <button class="btn-primary" id="todo-add">Создать</button>
+        </div>
+        <div class="list" id="todo-list"></div>
+        <footer class="footer">
+            <span>Выполнено: <strong id="stats-done" style="color: var(--success)">0</strong></span>
+            <span>Осталось: <strong id="stats-left" style="color: var(--primary)">0</strong></span>
+        </footer>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            "use strict";
+            const input = document.getElementById("todo-input");
+            const addBtn = document.getElementById("todo-add");
+            const list = document.getElementById("todo-list");
+            const doneEl = document.getElementById("stats-done");
+            const leftEl = document.getElementById("stats-left");
+
+            const updateCounters = () => {
+                const total = list.children.length;
+                const done = list.querySelectorAll(".completed").length;
+                doneEl.textContent = done;
+                leftEl.textContent = total - done;
+            };
+
+            const createTask = () => {
+                const text = input.value.trim();
+                if (!text) return;
+
+                const item = document.createElement("div");
+                item.className = "list-item";
+
+                const span = document.createElement("span");
+                span.className = "item-text";
+                span.textContent = text;
+
+                const wrapper = document.createElement("div");
+                wrapper.className = "actions";
+
+                const doneBtn = document.createElement("button");
+                doneBtn.textContent = "✔";
+                doneBtn.className = "btn-action";
+                doneBtn.style.background = "var(--success)";
+                doneBtn.dataset.cmd = "toggle";
+
+                const delBtn = document.createElement("button");
+                delBtn.textContent = "✖";
+                delBtn.className = "btn-action";
+                delBtn.style.background = "var(--danger)";
+                delBtn.dataset.cmd = "delete";
+
+                wrapper.append(doneBtn, delBtn);
+                item.append(span, wrapper);
+                list.appendChild(item);
+
+                input.value = "";
+                updateCounters();
+            };
+
+            // Профессиональное делегирование событий
+            list.addEventListener("click", (e) => {
+                const btn = e.target.closest("button");
+                if (!btn) return;
+
+                const targetRow = btn.closest(".list-item");
+                if (btn.dataset.cmd === "toggle") targetRow.classList.toggle("completed");
+                else if (btn.dataset.cmd === "delete") targetRow.remove();
+
+                updateCounters();
+            });
+
+            addBtn.addEventListener("click", createTask);
+            input.addEventListener("keydown", (e) => { if (e.key === "Enter") createTask(); });
+        });
+    </script>
+</body>
+</html>
