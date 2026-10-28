@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №9 — Задание 19 (Advanced)</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818cf8;
+            --primary-hover: #6366f1;
+            --bg-main: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            padding: 30px 15px;
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .studio-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s;
+        }
+
+        .studio-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 16px;
+        }
+
+        .header-title h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .icon-btn {
+            background: var(--border);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .icon-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 12px 40px;
+            font-size: 1rem;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        #search-input:focus {
+            border-color: var(--primary);
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        select {
+            padding: 0 14px;
+            font-size: 0.95rem;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .tabs-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .loading-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(79, 70, 229, 0.1);
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(79, 70, 229, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-cancel {
+            margin-left: auto;
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .history-box {
+            background: var(--bg-main);
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .history-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .tag {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 3px 10px;
+            border-radius: 14px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tag:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .dashboard-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            font-weight: 500;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .post-card {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            gap: 14px;
+            transition: var(--transition);
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .post-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            flex-shrink: 0;
+        }
+
+        .post-content {
+            flex: 1;
+        }
+
+        .post-meta {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .post-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .post-body {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .post-footer {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .btn-action:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-fav.active {
+            color: #e11d48;
+            border-color: #e11d48;
+        }
+
+        mark {
+            background: #fef08a;
+            color: #713f12;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Модальное окно */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--border);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .comment-item {
+            background: var(--bg-main);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.82rem;
+        }
+
+        .comment-email {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="studio-container">
+        <header class="studio-header">
+            <div class="header-title">
+                <h1>📚 Поиск публикаций</h1>
+                <p>Лабораторная работа №9 • Задание 19</p>
+            </div>
+            <button id="theme-toggle" class="icon-btn" title="Сменить тему">🌙</button>
+        </header>
+
+        <div class="tabs-row">
+            <button class="tab-btn active" data-tab="search">🔍 Поиск</button>
+            <button class="tab-btn" data-tab="favorites">⭐ Избранное (<span id="fav-count">0</span>)</button>
+        </div>
+
+        <section id="search-view">
+            <div class="control-panel">
+                <div class="input-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="Введите заголовок (debounce + AbortController)..." 
+                        autocomplete="off"
+                    >
+                    <button id="clear-btn" class="clear-btn" hidden>&times;</button>
+                </div>
+
+                <select id="sort-select">
+                    <option value="default">Сортировка: по ID</option>
+                    <option value="title">По алфавиту</option>
+                </select>
+
+                <select id="user-select">
+                    <option value="">Все авторы</option>
+                    <option value="1">Автор 1</option>
+                    <option value="2">Автор 2</option>
+                    <option value="3">Автор 3</option>
+                </select>
+            </div>
+
+            <div id="loading-indicator" class="loading-bar" hidden>
+                <div class="spinner"></div>
+                <span>Загрузка данных с сервера...</span>
+                <button id="cancel-btn" class="btn-cancel">Отменить</button>
+            </div>
+
+            <div id="history-box" class="history-box" hidden>
+                <span class="history-label">История:</span>
+                <div id="history-tags" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+            </div>
+        </section>
+
+        <div class="dashboard-stats">
+            <span id="status-text">Введите поисковый запрос...</span>
+            <span id="cache-status">Кэш: пусто</span>
+        </div>
+
+        <section class="cards-container" id="cards-container"></section>
+    </div>
+
+    <!-- Модальное окно -->
+    <div id="modal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close" id="modal-close">&times;</button>
+            <div id="modal-body"></div>
+            <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 12px;">
+                <h4>💬 Комментарии:</h4>
+                <div id="comments-container" style="margin-top: 8px;">Загрузка...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const searchInput = document.querySelector('#search-input');
+        const clearBtn = document.querySelector('#clear-btn');
+        const loadingIndicator = document.querySelector('#loading-indicator');
+        const cancelBtn = document.querySelector('#cancel-btn');
+        const statusText = document.querySelector('#status-text');
+        const cacheStatus = document.querySelector('#cache-status');
+        const cardsContainer = document.querySelector('#cards-container');
+        const sortSelect = document.querySelector('#sort-select');
+        const userSelect = document.querySelector('#user-select');
+        const historyBox = document.querySelector('#history-box');
+        const historyTags = document.querySelector('#history-tags');
+        const themeToggle = document.querySelector('#theme-toggle');
+        const favCountSpan = document.querySelector('#fav-count');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const modal = document.querySelector('#modal');
+        const modalClose = document.querySelector('#modal-close');
+        const modalBody = document.querySelector('#modal-body');
+        const commentsContainer = document.querySelector('#comments-container');
+
+        const DEBOUNCE_MS = 350;
+        const MEMORY_CACHE = new Map();
+        let debounceTimer = null;
+        let abortController = null;
+        let currentPosts = [];
+        let currentQuery = '';
+        let activeTab = 'search';
+        
+        let favorites = JSON.parse(localStorage.getItem('lab9_favs') || '[]');
+        let history = JSON.parse(localStorage.getItem('lab9_history') || '[]');
+        updateFavCount();
+        renderHistory();
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            themeToggle.textContent = newTheme === 'light' ? '🌙' : '☀️';
+        });
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                activeTab = e.target.dataset.tab;
+                
+                document.querySelector('#search-view').style.display = activeTab === 'search' ? 'block' : 'none';
+                
+                if (activeTab === 'favorites') {
+                    renderFavorites();
+                } else {
+                    if (currentPosts.length > 0) {
+                        renderCards(currentPosts, currentQuery);
+                    } else {
+                        cardsContainer.replaceChildren();
+                        statusText.textContent = 'Введите поисковый запрос...';
+                    }
+                }
+            });
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            currentQuery = query;
+            clearBtn.hidden = query.length === 0;
+
+            clearTimeout(debounceTimer);
+
+            if (!query) {
+                abortRequest();
+                loadingIndicator.hidden = true;
+                cardsContainer.replaceChildren();
+                statusText.textContent = 'Введите поисковый запрос...';
+                cacheStatus.textContent = 'Кэш: пусто';
+                return;
+            }
+
+            statusText.textContent = 'Ожидание ввода (Debounce)...';
+            loadingIndicator.hidden = false;
+
+            debounceTimer = setTimeout(() => {
+                fetchPosts(query, userSelect.value);
+            }, DEBOUNCE_MS);
+        });
+
+        userSelect.addEventListener('change', () => {
+            if (currentQuery) fetchPosts(currentQuery, userSelect.value);
+        });
+
+        sortSelect.addEventListener('change', () => {
+            if (currentPosts.length > 0) renderCards(currentPosts, currentQuery);
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            abortRequest();
+            loadingIndicator.hidden = true;
+            statusText.textContent = 'Запрос отменен через AbortController.';
+        });
+
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            currentQuery = '';
+            clearBtn.hidden = true;
+            abortRequest();
+            loadingIndicator.hidden = true;
+            cardsContainer.replaceChildren();
+            statusText.textContent = 'Введите поисковый запрос...';
+            searchInput.focus();
+        });
+
+        function abortRequest() {
+            if (abortController) {
+                abortController.abort();
+                abortController = null;
+            }
+        }
+
+        async function fetchPosts(query, userId = '') {
+            abortRequest();
+            abortController = new AbortController();
+            const { signal } = abortController;
+
+            const cacheKey = `${query.toLowerCase()}_${userId}`;
+
+            if (MEMORY_CACHE.has(cacheKey)) {
+                loadingIndicator.hidden = true;
+                currentPosts = MEMORY_CACHE.get(cacheKey);
+                cacheStatus.textContent = 'Кэш: Hit ⚡';
+                renderCards(currentPosts, query);
+                saveHistory(query);
+                return;
+            }
+
+            cacheStatus.textContent = 'Кэш: Miss 🌐';
+            loadingIndicator.hidden = false;
+            statusText.textContent = `Загрузка данных...`;
+            cardsContainer.replaceChildren();
+
+            try {
+                let url = `https://jsonplaceholder.typicode.com/posts?q=${encodeURIComponent(query)}`;
+                if (userId) url += `&userId=${userId}`;
+
+                const response = await fetch(url, { signal });
+                if (!response.ok) throw new Error(`HTTP ошибка: ${response.status}`);
+
+                const data = await response.json();
+                MEMORY_CACHE.set(cacheKey, data);
+                currentPosts = data;
+
+                loadingIndicator.hidden = true;
+                renderCards(data, query);
+                saveHistory(query);
+
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+                loadingIndicator.hidden = true;
+                statusText.textContent = `Ошибка: ${err.message}`;
+            } finally {
+                abortController = null;
+            }
+        }
+
+        function renderCards(posts, query) {
+            if (activeTab === 'favorites') return;
+
+            if (posts.length === 0) {
+                statusText.textContent = 'Ничего не найдено.';
+                cardsContainer.replaceChildren();
+                return;
+            }
+
+            statusText.textContent = `Найдено результатов: ${posts.length}`;
+            
+            let processed = [...posts];
+            if (sortSelect.value === 'title') {
+                processed.sort((a, b) => a.title.localeCompare(b.title));
+            } else {
+                processed.sort((a, b) => a.id - b.id);
+            }
+
+            const fragment = document.createDocumentFragment();
+            processed.forEach(post => {
+                fragment.appendChild(createCardElement(post, query));
+            });
+
+            cardsContainer.replaceChildren(fragment);
+        }
+
+        function createCardElement(post, query) {
+            const card = document.createElement('article');
+            card.className = 'post-card';
+
+            const isFav = favorites.some(f => f.id === post.id);
+            const avatarUrl = `https://i.pravatar.cc/100?img=${(post.userId % 70) + 1}`;
+
+            card.innerHTML = `
+                <img class="post-avatar" src="${avatarUrl}" alt="Avatar">
+                <div class="post-content">
+                    <div class="post-meta">ID: ${post.id} • Автор: ${post.userId}</div>
+                    <h3 class="post-title">${highlight(post.title, query)}</h3>
+                    <p class="post-body">${escapeHtml(post.body)}</p>
+                    <div class="post-footer">
+                        <button class="btn-action btn-fav ${isFav ? 'active' : ''}">${isFav ? '⭐ В избранном' : '☆ В избранное'}</button>
+                        <button class="btn-action btn-details">📖 Подробнее</button>
+                    </div>
+                </div>
+            `;
+
+            card.querySelector('.btn-fav').addEventListener('click', () => toggleFavorite(post));
+            card.querySelector('.btn-details').addEventListener('click', () => openModal(post));
+
+            return card;
+        }
+
+        function toggleFavorite(post) {
+            const index = favorites.findIndex(f => f.id === post.id);
+            if (index > -1) {
+                favorites.splice(index, 1);
+            } else {
+                favorites.push(post);
+            }
+            localStorage.setItem('lab9_favs', JSON.stringify(favorites));
+            updateFavCount();
+
+            if (activeTab === 'favorites') {
+                renderFavorites();
+            } else {
+                renderCards(currentPosts, currentQuery);
+            }
+        }
+
+        function renderFavorites() {
+            if (favorites.length === 0) {
+                statusText.textContent = 'Список избранного пуст.';
+                cardsContainer.replaceChildren();
+                return;
+            }
+            statusText.textContent = `Избранных: ${favorites.length}`;
+            const fragment = document.createDocumentFragment();
+            favorites.forEach(post => {
+                fragment.appendChild(createCardElement(post, ''));
+            });
+            cardsContainer.replaceChildren(fragment);
+        }
+
+        function updateFavCount() {
+            favCountSpan.textContent = favorites.length;
+        }
+
+        async function openModal(post) {
+            modalBody.innerHTML = `
+                <h2>${escapeHtml(post.title)}</h2>
+                <p style="margin: 10px 0; color: var(--text-muted);">${escapeHtml(post.body)}</p>
+                <small>ID: ${post.id} | UserID: ${post.userId}</small>
+            `;
+            commentsContainer.textContent = 'Загрузка комментариев...';
+            modal.classList.add('open');
+
+            try {
+                const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${post.id}/comments`);
+                const comments = await res.json();
+                
+                const cFragment = document.createDocumentFragment();
+                comments.forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'comment-item';
+                    div.innerHTML = `<div class="comment-email">${escapeHtml(c.email)}</div><div>${escapeHtml(c.body)}</div>`;
+                    cFragment.appendChild(div);
+                });
+                commentsContainer.replaceChildren(cFragment);
+            } catch (e) {
+                commentsContainer.textContent = 'Ошибка загрузки комментариев.';
+            }
+        }
+
+        modalClose.addEventListener('click', () => modal.classList.remove('open'));
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+
+        function saveHistory(q) {
+            if (!q || history.includes(q)) return;
+            history.unshift(q);
+            if (history.length > 5) history.pop();
+            localStorage.setItem('lab9_history', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (history.length === 0) {
+                historyBox.hidden = true;
+                return;
+            }
+            historyBox.hidden = false;
+            historyTags.replaceChildren();
+            history.forEach(term => {
+                const tag = document.createElement('button');
+                tag.className = 'tag';
+                tag.textContent = term;
+                tag.addEventListener('click', () => {
+                    searchInput.value = term;
+                    currentQuery = term;
+                    clearBtn.hidden = false;
+                    fetchPosts(term, userSelect.value);
+                });
+                historyTags.appendChild(tag);
+            });
+        }
+
+        function highlight(text, q) {
+            const safe = escapeHtml(text);
+            if (!q) return safe;
+            const regex = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return safe.replace(regex, '<mark>$1</mark>');
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>
