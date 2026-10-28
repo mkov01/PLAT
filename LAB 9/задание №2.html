@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №9 — Менеджер Задач (Task 9)</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-primary: #0a0d14;
+            --bg-card: rgba(18, 24, 38, 0.7);
+            --bg-card-hover: rgba(28, 36, 56, 0.85);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(99, 102, 241, 0.3);
+            
+            --accent-primary: #6366f1;
+            --accent-secondary: #a855f7;
+            --accent-cyan: #06b6d4;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-dim: #6b7280;
+
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-glow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 60%);
+            background-attachment: fixed;
+        }
+
+        /* Container */
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Glassmorphism Panel Base */
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-glow);
+            padding: 1.75rem;
+            transition: border-color var(--transition-fast);
+        }
+
+        /* Header Styling */
+        header.glass-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-cyan));
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .title-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .title-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+            font-size: 1.35rem;
+        }
+
+        .title-text h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #9ca3af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .title-text p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Reload Button */
+        .btn-reload {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            padding: 0.7rem 1.3rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-reload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+            filter: brightness(1.1);
+        }
+
+        .btn-reload:active {
+            transform: translateY(0);
+        }
+
+        .btn-reload:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-reload i.spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Stats Cards Bar */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 0.85rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 0.9rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            transition: background var(--transition-fast);
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .stat-icon.total { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+        .stat-icon.completed { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .stat-icon.pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+        .stat-icon.speed { background: rgba(6, 182, 212, 0.15); color: #22d3ee; }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-val {
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-main);
+        }
+
+        .stat-lbl {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        /* Controls Section: Search & Filters */
+        .controls-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .controls-bar {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        /* Search Box */
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            transition: color var(--transition-fast);
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(10, 13, 20, 0.6);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            outline: none;
+            transition: all var(--transition-fast);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .search-input:focus + i {
+            color: var(--accent-primary);
+        }
+
+        /* Filter Segmented Buttons */
+        .filter-group {
+            display: flex;
+            background: rgba(10, 13, 20, 0.6);
+            padding: 4px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-glass);
+            gap: 4px;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.6rem 1rem;
+            border-radius: calc(var(--radius-md) - 4px);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .filter-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--accent-primary), rgba(99, 102, 241, 0.8));
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .filter-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Status & Banner Messages */
+        .status-banner {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .status-banner.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .status-banner.info {
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: #67e8f9;
+        }
+
+        .btn-retry {
+            margin-left: auto;
+            background: var(--accent-danger);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity var(--transition-fast);
+        }
+
+        .btn-retry:hover {
+            opacity: 0.9;
+        }
+
+        /* Task List Container */
+        .todo-list-wrapper {
+            position: relative;
+            min-height: 250px;
+        }
+
+        .todo-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        /* Task Card Element */
+        .todo-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            transition: all var(--transition-fast);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .todo-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-glow);
+            transform: translateX(4px);
+        }
+
+        .todo-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+            min-width: 0; /* Ensures line clipping works */
+        }
+
+        /* Custom Checkbox */
+        .custom-checkbox {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid var(--text-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            flex-shrink: 0;
+            background: rgba(10, 13, 20, 0.4);
+        }
+
+        .todo-card.completed .custom-checkbox {
+            background: var(--accent-success);
+            border-color: var(--accent-success);
+            color: #000;
+        }
+
+        .custom-checkbox i {
+            font-size: 0.75rem;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all var(--transition-fast);
+        }
+
+        .todo-card.completed .custom-checkbox i {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Task Details */
+        .todo-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 0;
+        }
+
+        .todo-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color var(--transition-fast);
+        }
+
+        .todo-card.completed .todo-title {
+            color: var(--text-dim);
+            text-decoration: line-through;
+        }
+
+        .todo-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .todo-id-tag {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 1px 6px;
+            border-radius: 4px;
+            color: var(--text-muted);
+        }
+
+        /* Status Badge Chip */
+        .status-chip {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            flex-shrink: 0;
+        }
+
+        .status-chip.done {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--accent-success);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .status-chip.pending {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--accent-warning);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+        }
+
+        /* Skeleton / Loading Animation */
+        .skeleton-card {
+            height: 68px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%;
+            animation: skeletonLoading 1.5s infinite;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-glass);
+        }
+
+        /* Empty State Indicator */
+        .empty-state {
+            text-align: center;
+            padding: 3.5rem 1rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--text-dim);
+            opacity: 0.5;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        /* Keyframes */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6deg); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10deg); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes skeletonLoading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Mobile tweaks */
+        @media (max-width: 480px) {
+            .glass-panel {
+                padding: 1.2rem;
+            }
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .btn-reload {
+                width: 100%;
+                justify-content: center;
+            }
+            .status-chip {
+                display: none; /* Simplify on tiny screens */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Main Header & Controls -->
+        <header class="glass-panel">
+            <div class="header-top">
+                <div class="title-group">
+                    <div class="title-icon">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <div class="title-text">
+                        <h1>Менеджер Задач</h1>
+                        <p>Лабораторная работа №9 • Вариант 9 (Fetch API / JSONPlaceholder)</p>
+                    </div>
+                </div>
+                <button id="btnReload" class="btn-reload" title="Загрузить свежие данные с сервера">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Загрузить / Обновить</span>
+                </button>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon total"><i class="fa-solid fa-layer-group"></i></div>
+                    <div class="stat-info">
+                        <span id="statTotal" class="stat-val">0</span>
+                        <span class="stat-lbl">Всего задач</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon completed"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="stat-info">
+                        <span id="statCompleted" class="stat-val">0</span>
+                        <span class="stat-lbl">Выполнено</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon pending"><i class="fa-solid fa-clock"></i></div>
+                    <div class="stat-info">
+                        <span id="statPending" class="stat-val">0</span>
+                        <span class="stat-lbl">В процессе</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon speed"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="stat-info">
+                        <span id="statTime" class="stat-val">0 ms</span>
+                        <span class="stat-lbl">Отклики API</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls: Search & Segment Filters -->
+            <div class="controls-bar">
+                <div class="search-wrapper">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Поиск по названию задачи...">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+
+                <div class="filter-group" role="tablist">
+                    <button class="filter-btn active" data-filter="all" id="filterAll">
+                        <span>Все</span>
+                        <span id="badgeAll" class="filter-badge">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="completed" id="filterCompleted">
+                        <span>Выполненные</span>
+                        <span id="badgeCompleted" class="filter-badge">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="pending" id="filterPending">
+                        <span>Невыполненные</span>
+                        <span id="badgePending" class="filter-badge">0</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Status Banner Slot -->
+        <div id="statusContainer"></div>
+
+        <!-- Task List Body -->
+        <main class="glass-panel todo-list-wrapper">
+            <ul id="todoList" class="todo-list">
+                <!-- Dynamic Items will be safely injected here -->
+            </ul>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <span><i class="fa-solid fa-code"></i> Vanilla JS, Async/Await, JSONPlaceholder REST API</span>
+            <span id="lastUpdated">Статус: Готов к загрузке</span>
+        </footer>
+    </div>
+
+    <!-- Application Script Logic -->
+    <script>
+        // State Management
+        const state = {
+            todos: [],
+            currentFilter: 'all', // 'all' | 'completed' | 'pending'
+            searchQuery: '',
+            isLoading: false,
+            responseTime: 0
+        };
+
+        // DOM Element Selectors
+        const elements = {
+            btnReload: document.getElementById('btnReload'),
+            todoList: document.getElementById('todoList'),
+            statusContainer: document.getElementById('statusContainer'),
+            searchInput: document.getElementById('searchInput'),
+            filterButtons: document.querySelectorAll('.filter-btn'),
+            
+            // Statistics
+            statTotal: document.getElementById('statTotal'),
+            statCompleted: document.getElementById('statCompleted'),
+            statPending: document.getElementById('statPending'),
+            statTime: document.getElementById('statTime'),
+            
+            // Badges
+            badgeAll: document.getElementById('badgeAll'),
+            badgeCompleted: document.getElementById('badgeCompleted'),
+            badgePending: document.getElementById('badgePending'),
+            lastUpdated: document.getElementById('lastUpdated')
+        };
+
+        // --- Core Fetch Functionality ---
+        async function fetchTodos() {
+            if (state.isLoading) return;
+            
+            state.isLoading = true;
+            updateLoadingUI(true);
+            clearStatusBanner();
+            
+            const startTime = performance.now();
+
+            try {
+                // Performing GET request using fetch & async/await
+                const response = await fetch('https://jsonplaceholder.typicode.com/todos');
+                
+                // HTTP Error response handling (Lab Req 2)
+                if (!response.ok) {
+                    throw new Error(`Ошибка HTTP ${response.status}: ${response.statusText || 'Не удалось получить данные'}`);
+                }
+
+                const data = await response.json();
+                const endTime = performance.now();
+                
+                state.responseTime = Math.round(endTime - startTime);
+                
+                // Store loaded tasks in state
+                state.todos = data;
+                
+                // Render UI
+                renderApp();
+                showStatusBanner(`Успешно загружено ${data.length} задач за ${state.responseTime} мс`, 'info');
+                elements.lastUpdated.textContent = `Обновлено в ${new Date().toLocaleTimeString()}`;
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                showStatusBanner(`Ошибка загрузки: ${error.message || 'Сетевая ошибка'}`, 'error', true);
+                renderEmptyState('Не удалось загрузить список задач. Проверьте подключение.');
+            } finally {
+                state.isLoading = false;
+                updateLoadingUI(false);
+            }
+        }
+
+        // Toggle task complete status locally
+        function toggleTodoStatus(id) {
+            state.todos = state.todos.map(todo => {
+                if (todo.id === id) {
+                    return { ...todo, completed: !todo.completed };
+                }
+                return todo;
+            });
+            renderApp();
+        }
+
+        // Filtering Logic
+        function getFilteredTodos() {
+            return state.todos.filter(todo => {
+                // Filter status matching
+                const matchesFilter = 
+                    state.currentFilter === 'all' ? true :
+                    state.currentFilter === 'completed' ? todo.completed :
+                    !todo.completed;
+
+                // Search query matching
+                const matchesSearch = todo.title.toLowerCase().includes(state.searchQuery.toLowerCase());
+
+                return matchesFilter && matchesSearch;
+            });
+        }
+
+        // --- Safe DOM Rendering ---
+        function renderApp() {
+            updateStatsAndBadges();
+            renderTodoList();
+        }
+
+        function renderTodoList() {
+            // Clear current list content safely
+            elements.todoList.replaceChildren();
+
+            const filteredTodos = getFilteredTodos();
+
+            if (filteredTodos.length === 0) {
+                if (state.todos.length === 0) return; // Managed by skeleton/empty
+                renderEmptyState('Задачи по вашему запросу не найдены.');
+                return;
+            }
+
+            // Create DOM Nodes securely without innerHTML injection
+            const fragment = document.createDocumentFragment();
+
+            filteredTodos.forEach(todo => {
+                const li = document.createElement('li');
+                li.className = `todo-card ${todo.completed ? 'completed' : ''}`;
+                li.setAttribute('data-id', todo.id);
+
+                // Left Section (Checkbox & Title)
+                const leftDiv = document.createElement('div');
+                leftDiv.className = 'todo-left';
+
+                const checkbox = document.createElement('div');
+                checkbox.className = 'custom-checkbox';
+                checkbox.setAttribute('role', 'checkbox');
+                checkbox.setAttribute('aria-checked', todo.completed);
+                
+                const checkIcon = document.createElement('i');
+                checkIcon.className = 'fa-solid fa-check';
+                checkbox.appendChild(checkIcon);
+
+                // Toggle click listener
+                checkbox.addEventListener('click', () => toggleTodoStatus(todo.id));
+
+                const detailsDiv = document.createElement('div');
+                detailsDiv.className = 'todo-details';
+
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'todo-title';
+                titleSpan.textContent = todo.title;
+
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'todo-meta';
+
+                const idTag = document.createElement('span');
+                idTag.className = 'todo-id-tag';
+                idTag.textContent = `#${todo.id}`;
+
+                const userTag = document.createElement('span');
+                userTag.textContent = `User ${todo.userId}`;
+
+                metaDiv.append(idTag, userTag);
+                detailsDiv.append(titleSpan, metaDiv);
+                leftDiv.append(checkbox, detailsDiv);
+
+                // Right Status Chip
+                const chip = document.createElement('div');
+                chip.className = `status-chip ${todo.completed ? 'done' : 'pending'}`;
+                
+                const chipIcon = document.createElement('i');
+                chipIcon.className = todo.completed ? 'fa-solid fa-check-circle' : 'fa-solid fa-hourglass-half';
+                
+                const chipText = document.createElement('span');
+                chipText.textContent = todo.completed ? 'Выполнено' : 'В процессе';
+
+                chip.append(chipIcon, chipText);
+
+                // Combine elements into list item
+                li.append(leftDiv, chip);
+                fragment.appendChild(li);
+            });
+
+            elements.todoList.appendChild(fragment);
+        }
+
+        // Render Skeletons during loading
+        function renderSkeletons() {
+            elements.todoList.replaceChildren();
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < 6; i++) {
+                const skel = document.createElement('li');
+                skel.className = 'skeleton-card';
+                fragment.appendChild(skel);
+            }
+            elements.todoList.appendChild(fragment);
+        }
+
+        // Render Empty/No-results message safely
+        function renderEmptyState(message) {
+            elements.todoList.replaceChildren();
+
+            const container = document.createElement('div');
+            container.className = 'empty-state';
+
+            const icon = document.createElement('i');
+            icon.className = 'fa-regular fa-folder-open';
+
+            const text = document.createElement('p');
+            text.textContent = message;
+
+            container.append(icon, text);
+            elements.todoList.appendChild(container);
+        }
+
+        // Stats & Badge Updates
+        function updateStatsAndBadges() {
+            const total = state.todos.length;
+            const completed = state.todos.filter(t => t.completed).length;
+            const pending = total - completed;
+
+            elements.statTotal.textContent = total;
+            elements.statCompleted.textContent = completed;
+            elements.statPending.textContent = pending;
+            elements.statTime.textContent = `${state.responseTime} ms`;
+
+            elements.badgeAll.textContent = total;
+            elements.badgeCompleted.textContent = completed;
+            elements.badgePending.textContent = pending;
+        }
+
+        // UI Helpers & Banner Notifications
+        function updateLoadingUI(loading) {
+            elements.btnReload.disabled = loading;
+            const icon = elements.btnReload.querySelector('i');
+            if (loading) {
+                icon.classList.add('spinning');
+                renderSkeletons();
+            } else {
+                icon.classList.remove('spinning');
+            }
+        }
+
+        function showStatusBanner(message, type = 'info', showRetry = false) {
+            clearStatusBanner();
+
+            const banner = document.createElement('div');
+            banner.className = `status-banner ${type}`;
+
+            const icon = document.createElement('i');
+            icon.className = type === 'error' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-info';
+
+            const textSpan = document.createElement('span');
+            textSpan.textContent = message;
+
+            banner.append(icon, textSpan);
+
+            if (showRetry) {
+                const retryBtn = document.createElement('button');
+                retryBtn.className = 'btn-retry';
+                retryBtn.textContent = 'Повторить';
+                retryBtn.addEventListener('click', fetchTodos);
+                banner.appendChild(retryBtn);
+            }
+
+            elements.statusContainer.appendChild(banner);
+        }
+
+        function clearStatusBanner() {
+            elements.statusContainer.replaceChildren();
+        }
+
+        // --- Event Listeners Setup ---
+        function initEventListeners() {
+            // Reload button click
+            elements.btnReload.addEventListener('click', fetchTodos);
+
+            // Live Search input
+            elements.searchInput.addEventListener('input', (e) => {
+                state.searchQuery = e.target.value;
+                renderTodoList();
+            });
+
+            // Filter button segment toggles
+            elements.filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    elements.filterButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    state.currentFilter = btn.getAttribute('data-filter');
+                    renderTodoList();
+                });
+            });
+        }
+
+        // Initialize App on DOM Content Loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initEventListeners();
+            fetchTodos(); // Initial automatic fetch call
+        });
+    </script>
+</body>
+</html>
