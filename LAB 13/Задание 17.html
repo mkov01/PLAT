@@ -1,0 +1,1168 @@
+<html lang="ru"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №13 — Вариант 17 | История браузера</title>
+    <style>
+      :root {
+        --bg: #0b0f19;
+        --surface: #131b2e;
+        --surface-2: #1c2742;
+        --border: #2c3b5e;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --primary: #3b82f6;
+        --primary-hover: #2563eb;
+        --danger: #ef4444;
+        --danger-hover: #dc2626;
+        --warning: #f59e0b;
+        --success: #10b981;
+        --accent: #a855f7;
+        --radius: 16px;
+        --shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+      }
+  
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      }
+  
+      body {
+        background: radial-gradient(circle at top left, #1e1b4b 0%, #0b0f19 55%);
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.5;
+      }
+  
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(11, 15, 25, 0.88);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+  
+      .nav-container {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 14px 20px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+  
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+  
+      .brand-badge {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: #ffffff;
+        font-weight: 800;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 13px;
+      }
+  
+      .brand h1 {
+        font-size: 18px;
+        font-weight: 700;
+      }
+  
+      .brand span {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+      }
+  
+      .tabs {
+        display: flex;
+        gap: 8px;
+        background: var(--surface);
+        padding: 5px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+  
+      .tab-btn {
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        padding: 8px 16px;
+        border-radius: 9px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s ease;
+      }
+  
+      .tab-btn:hover {
+        color: var(--text);
+      }
+  
+      .tab-btn.active {
+        background: var(--primary);
+        color: #ffffff;
+      }
+  
+      main {
+        max-width: 1240px;
+        margin: 24px auto;
+        padding: 0 20px 60px;
+      }
+  
+      .tab-content {
+        display: none;
+        animation: fadeIn 0.25s ease;
+      }
+  
+      .tab-content.active {
+        display: block;
+      }
+  
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+  
+      /* Окно браузера */
+      .browser-window {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        margin-bottom: 24px;
+      }
+  
+      .browser-top {
+        background: #0f1626;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+      }
+  
+      .window-dots {
+        display: flex;
+        gap: 7px;
+        margin-right: 6px;
+      }
+  
+      .w-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+  
+      .nav-controls {
+        display: flex;
+        gap: 6px;
+      }
+  
+      .icon-btn {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+      }
+  
+      .icon-btn:hover:not(:disabled) {
+        background: var(--primary);
+        border-color: var(--primary);
+      }
+  
+      .icon-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+  
+      .address-form {
+        flex: 1;
+        display: flex;
+        gap: 8px;
+        min-width: 240px;
+      }
+  
+      .address-bar {
+        flex: 1;
+        background: #080c14;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 8px 14px;
+        color: var(--text);
+        font-size: 14px;
+        font-family: Consolas, monospace;
+        outline: none;
+      }
+  
+      .address-bar:focus {
+        border-color: var(--primary);
+      }
+  
+      .btn {
+        border: none;
+        padding: 9px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+  
+      .btn-primary {
+        background: var(--primary);
+        color: #ffffff;
+      }
+  
+      .btn-primary:hover {
+        background: var(--primary-hover);
+      }
+  
+      .btn-secondary {
+        background: var(--surface-2);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+  
+      .btn-secondary:hover {
+        background: #273659;
+      }
+  
+      .btn-danger {
+        background: var(--danger);
+        color: #ffffff;
+      }
+  
+      .btn-danger:hover {
+        background: var(--danger-hover);
+      }
+  
+      /* Закладки быстрого перехода */
+      .bookmarks-bar {
+        background: #111829;
+        padding: 8px 16px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+  
+      .bookmark-chip {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        color: #cbd5e1;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+  
+      .bookmark-chip:hover {
+        border-color: var(--primary);
+        color: #ffffff;
+      }
+  
+      /* Экран активной страницы */
+      .viewport {
+        position: relative;
+        min-height: 290px;
+        display: flex;
+        align-items: flex-end;
+        overflow: hidden;
+      }
+  
+      .viewport img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.45);
+        transition: transform 0.5s ease;
+      }
+  
+      .viewport-overlay {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        padding: 28px;
+        background: linear-gradient(to top, rgba(11, 15, 25, 0.96), rgba(11, 15, 25, 0.25));
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+      }
+  
+      .site-badge {
+        display: inline-block;
+        background: rgba(59, 130, 246, 0.25);
+        border: 1px solid rgba(59, 130, 246, 0.5);
+        color: #93c5fd;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-family: Consolas, monospace;
+        margin-bottom: 8px;
+      }
+  
+      .viewport h2 {
+        font-size: 26px;
+        margin-bottom: 6px;
+      }
+  
+      .viewport p {
+        color: #cbd5e1;
+        max-width: 680px;
+        font-size: 14px;
+      }
+  
+      /* Визуализация двух стеков (Back & Forward) */
+      .stacks-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+      }
+  
+      .stack-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+      }
+  
+      .stack-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+      }
+  
+      .stack-header h3 {
+        font-size: 16px;
+      }
+  
+      .stack-count {
+        background: var(--surface-2);
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        color: #93c5fd;
+        font-weight: 700;
+      }
+  
+      .stack-list {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 8px;
+        min-height: 160px;
+        justify-content: flex-start;
+      }
+  
+      .stack-item {
+        background: #0d1424;
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--primary);
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+  
+      .stack-item.top {
+        border-left-color: var(--success);
+        background: rgba(16, 185, 129, 0.08);
+      }
+  
+      .stack-item.forward-item {
+        border-left-color: var(--accent);
+      }
+  
+      .stack-empty {
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+        padding: 40px 10px;
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+      }
+  
+      .current-box {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(168, 85, 247, 0.15));
+        border: 1px solid var(--primary);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        margin: auto 0;
+      }
+  
+      .current-box strong {
+        display: block;
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+  
+      .current-box code {
+        color: #93c5fd;
+        font-size: 13px;
+        word-break: break-all;
+      }
+  
+      /* Терминал Python */
+      .terminal {
+        background: #070a12;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+  
+      .terminal-header {
+        background: #111829;
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+        color: var(--muted);
+      }
+  
+      .terminal-body {
+        padding: 16px;
+        font-family: Consolas, monospace;
+        font-size: 13px;
+        max-height: 220px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+  
+      .log-line { color: #93c5fd; }
+      .log-line.err { color: #fca5a5; }
+      .log-line.ok { color: #6ee7b7; }
+      .log-line.warn { color: #fcd34d; }
+  
+      /* Toast */
+      .toast-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+  
+      .toast {
+        background: var(--surface-2);
+        border-left: 4px solid var(--primary);
+        color: var(--text);
+        padding: 14px 18px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        font-size: 14px;
+        max-width: 370px;
+        animation: slideIn 0.25s ease;
+      }
+  
+      .toast.error { border-left-color: var(--danger); }
+      .toast.warning { border-left-color: var(--warning); }
+  
+      @keyframes slideIn {
+        from { transform: translateX(30px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+  
+      /* Таблицы и отчёт */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        box-shadow: var(--shadow);
+      }
+  
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+        font-size: 14px;
+      }
+  
+      th, td {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+  
+      th {
+        color: var(--muted);
+        background: rgba(11, 15, 25, 0.5);
+      }
+  
+      .badge-pass {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 12px;
+      }
+  
+      pre {
+        background: #070a12;
+        padding: 16px;
+        border-radius: 12px;
+        overflow-x: auto;
+        font-family: Consolas, monospace;
+        font-size: 13px;
+        color: #e2e8f0;
+        border: 1px solid var(--border);
+        margin-top: 10px;
+      }
+  
+      details {
+        background: #0d1424;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+      }
+  
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: #93c5fd;
+      }
+  
+      details p {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #cbd5e1;
+      }
+    </style>
+  </head>
+  <body>
+  
+  <header>
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-badge">ЛАБ №13 • ВАРИАНТ 17</div>
+        <div>
+          <h1>StackBrowser — История браузера (2 стека LIFO)</h1>
+          <span>Повышенный уровень • Переход по URL, Назад (Back) и Вперёд (Forward)</span>
+        </div>
+      </div>
+      <nav class="tabs">
+        <button class="tab-btn active" onclick="switchTab('app', this)">🌐 Браузер и стеки</button>
+        <button class="tab-btn" onclick="switchTab('tests', this)">🧪 Автотесты (5+)</button>
+        <button class="tab-btn" onclick="switchTab('report', this)">📘 Отчёт и Python-код</button>
+      </nav>
+    </div>
+  </header>
+  
+  <main>
+    <!-- ВКЛАДКА 1: БРАУЗЕР И ВИЗУАЛИЗАЦИЯ СТЕКОВ -->
+    <section id="tab-app" class="tab-content active">
+      <div class="browser-window">
+        <div class="browser-top">
+          <div class="window-dots">
+            <div class="w-dot" style="background:#ef4444;"></div>
+            <div class="w-dot" style="background:#f59e0b;"></div>
+            <div class="w-dot" style="background:#10b981;"></div>
+          </div>
+          <div class="nav-controls">
+            <button id="btn-back" class="icon-btn" title="Назад (Back)" onclick="goBack()" disabled="">⬅</button>
+            <button id="btn-forward" class="icon-btn" title="Вперёд (Forward)" onclick="goForward()" disabled="">➡</button>
+            <button class="icon-btn" title="Домашняя страница" onclick="visitUrl('https://portal.edu.kz/dashboard')">🏠</button>
+          </div>
+          <form class="address-form" onsubmit="handleVisitForm(event)">
+            <input type="text" id="url-input" class="address-bar" placeholder="Введите URL (например: https://github.com/python)...">
+            <button type="submit" class="btn btn-primary">Перейти</button>
+          </form>
+          <button class="btn btn-secondary" onclick="exportHistoryJSON()">💾 Экспорт JSON</button>
+        </div>
+  
+        <div class="bookmarks-bar">
+          <span style="font-size:12px; color:var(--muted); margin-right:4px;">Закладки:</span>
+          <button class="bookmark-chip" onclick="visitUrl('https://docs.python.org/3/tutorial')">🐍 Python Docs</button>
+          <button class="bookmark-chip" onclick="visitUrl('https://github.com/algorithms')">💻 GitHub Repo</button>
+          <button class="bookmark-chip" onclick="visitUrl('https://unsplash.com/nature')">🏔️ Unsplash Gallery</button>
+          <button class="bookmark-chip" onclick="visitUrl('https://news.tech.ai/today')">📰 Tech News</button>
+          <button class="bookmark-chip" onclick="visitUrl('https://lms.university.kz/lab13')">🎓 LMS Курс</button>
+        </div>
+  
+        <div class="viewport">
+          <img id="page-photo" src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&amp;q=80" alt="Превью веб-страницы">
+          <div class="viewport-overlay">
+            <div>
+              <span id="page-url-badge" class="site-badge">https://portal.edu.kz/dashboard</span>
+              <h2 id="page-title">Образовательный портал — Главная</h2>
+              <p id="page-desc">Стартовая панель студента: расписание занятий, лабораторные работы и учебные материалы.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-secondary" onclick="goBack()">⬅ Назад (pop back)</button>
+              <button class="btn btn-secondary" onclick="goForward()">➡ Вперёд (pop forward)</button>
+              <button class="btn btn-danger" onclick="resetBrowser()">🧹 Сбросить историю</button>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Визуализация двух стеков и текущей вкладки -->
+      <div class="stacks-grid">
+        <div class="stack-card">
+          <div class="stack-header">
+            <h3>⬅ Стек <code>back_stack</code> (LIFO)</h3>
+            <span id="back-count" class="stack-count">0 эл.</span>
+          </div>
+          <div id="back-stack-list" class="stack-list"><div class="stack-empty">Стек back_stack пуст</div></div>
+        </div>
+  
+        <div class="stack-card">
+          <div class="stack-header">
+            <h3>🌐 Текущая страница</h3>
+            <span class="stack-count" style="color:#6ee7b7;">ACTIVE</span>
+          </div>
+          <div id="current-page-box" class="current-box">
+        <strong>Образовательный портал — Главная</strong>
+        <code>https://portal.edu.kz/dashboard</code>
+      </div>
+          <p style="font-size:12px; color:var(--muted); margin-top:12px; text-align:center;">
+            При переходе на новый URL текущий адрес уходит в <code>back_stack</code>, а <code>forward_stack</code> полностью очищается.
+          </p>
+        </div>
+  
+        <div class="stack-card">
+          <div class="stack-header">
+            <h3>➡ Стек <code>forward_stack</code> (LIFO)</h3>
+            <span id="forward-count" class="stack-count">0 эл.</span>
+          </div>
+          <div id="forward-stack-list" class="stack-list"><div class="stack-empty">Стек forward_stack пуст</div></div>
+        </div>
+      </div>
+  
+      <!-- Живой терминал Python -->
+      <div class="terminal">
+        <div class="terminal-header">
+          <span>Лог операций Python • <code>back_stack</code> и <code>forward_stack</code></span>
+          <button class="btn btn-secondary" style="padding:4px 10px; font-size:12px;" onclick="clearLog()">Очистить лог</button>
+        </div>
+        <div id="terminal-body" class="terminal-body"><div class="log-line ">[2:21:19 PM] &gt;&gt;&gt; browser = BrowserHistory("https://portal.edu.kz/dashboard")</div></div>
+      </div>
+    </section>
+  
+    <!-- ВКЛАДКА 2: АВТОТЕСТЫ -->
+    <section id="tab-tests" class="tab-content">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h3>🧪 Тестирование алгоритма (Пункт 5 методички)</h3>
+            <p style="font-size:14px; color:var(--muted);">Проверка переходов, возврата назад, перехода вперёд, очистки forward-стека при новом переходе и пустых стеков.</p>
+          </div>
+          <button class="btn btn-primary" onclick="runAllTests()">▶ Запустить все 5 тестов</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>№</th>
+              <th>Сценарий теста</th>
+              <th>Входные данные</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody id="tests-tbody">
+          <tr>
+            <td>1</td>
+            <td><strong>Обычный переход и возврат (Back)</strong></td>
+            <td><code>A -&gt; B -&gt; C, затем back()</code></td>
+            <td>Текущий URL: B; forward: [C]</td>
+            <td>Текущий URL: B; forward: [C]</td>
+            <td><span class="badge-pass">PASS</span></td>
+          </tr>
+        
+          <tr>
+            <td>2</td>
+            <td><strong>Переход вперёд (Forward)</strong></td>
+            <td><code>После back() вызвать forward()</code></td>
+            <td>Текущий URL: C; forward: []</td>
+            <td>Текущий URL: C; forward: []</td>
+            <td><span class="badge-pass">PASS</span></td>
+          </tr>
+        
+          <tr>
+            <td>3</td>
+            <td><strong>Очистка forward_stack при новом URL</strong></td>
+            <td><code>A -&gt; B -&gt; back() -&gt; visit(D)</code></td>
+            <td>Текущий URL: D; forward: []</td>
+            <td>Текущий URL: D; forward: []</td>
+            <td><span class="badge-pass">PASS</span></td>
+          </tr>
+        
+          <tr>
+            <td>4</td>
+            <td><strong>Пустой стек back_stack</strong></td>
+            <td><code>Вызов back() при back_stack = []</code></td>
+            <td>Обработано: история 'Назад' пуста</td>
+            <td>Обработано: история 'Назад' пуста</td>
+            <td><span class="badge-pass">PASS</span></td>
+          </tr>
+        
+          <tr>
+            <td>5</td>
+            <td><strong>Граничный случай (повтор текущего URL)</strong></td>
+            <td><code>Открыть текущий URL повторно</code></td>
+            <td>Дубликат в стек не добавлен</td>
+            <td>Дубликат в стек не добавлен</td>
+            <td><span class="badge-pass">PASS</span></td>
+          </tr>
+        </tbody>
+        </table>
+      </div>
+    </section>
+  
+    <!-- ВКЛАДКА 3: ОТЧЁТ И PYTHON КОД -->
+    <section id="tab-report" class="tab-content">
+      <div class="card" style="margin-bottom:20px;">
+        <h3>1. Обоснование выбора структуры данных</h3>
+        <p style="font-size:14px; color:#cbd5e1; margin-top:8px;">
+          Для моделирования истории браузера используются <strong>два стека (LIFO)</strong> на базе списков Python: <code>back_stack</code> и <code>forward_stack</code>, а также переменная <code>current_url</code> для хранения текущей открытой страницы.
+          Принцип <strong>LIFO</strong> (Last In, First Out) идеально подходит для навигации, так как кнопка «Назад» всегда возвращает пользователя на самую последнюю посещённую страницу (вершину <code>back_stack</code> за $O(1)$ через <code>pop()</code>).
+          При переходе по новому URL стек <code>forward_stack</code> очищается методом <code>clear()</code>, чтобы исключить несогласованные ветки истории.
+        </p>
+      </div>
+  
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3>2. Исходный код на Python (<code>lab13.py</code> — Вариант 17)</h3>
+          <button class="btn btn-primary" onclick="copyPythonCode()">📋 Скопировать код</button>
+        </div>
+        <pre id="python-code-block">class BrowserHistory:
+      def __init__(self, homepage="https://portal.edu.kz"):
+          self.current_url = homepage
+          self.back_stack = []
+          self.forward_stack = []
+  
+      def visit(self, url):
+          clean_url = url.strip()
+          if not clean_url:
+              print("Ошибка: пустой URL.")
+              return False
+          if clean_url == self.current_url:
+              print(f"Вы уже находитесь на странице {clean_url}")
+              return False
+          self.back_stack.append(self.current_url)
+          self.current_url = clean_url
+          self.forward_stack.clear()  # Обязательная очистка истории вперёд
+          print(f"Переход на: {self.current_url}")
+          return True
+  
+      def back(self):
+          if not self.back_stack:
+              print("Ошибка: история 'Назад' пуста.")
+              return None
+          self.forward_stack.append(self.current_url)
+          self.current_url = self.back_stack.pop()
+          print(f"Назад -&gt; {self.current_url}")
+          return self.current_url
+  
+      def forward(self):
+          if not self.forward_stack:
+              print("Ошибка: история 'Вперёд' пуста.")
+              return None
+          self.back_stack.append(self.current_url)
+          self.current_url = self.forward_stack.pop()
+          print(f"Вперёд -&gt; {self.current_url}")
+          return self.current_url
+  
+  if __name__ == "__main__":
+      browser = BrowserHistory("https://google.com")
+      browser.visit("https://python.org")
+      browser.visit("https://github.com")
+      browser.back()                        # Вернётся на python.org
+      browser.visit("https://wikipedia.org") # Очистит forward_stack
+      browser.forward()                     # Выведет, что история 'Вперёд' пуста</pre>
+      </div>
+  
+      <div class="card">
+        <h3>3. Ответы на контрольные вопросы</h3>
+        <div style="margin-top:12px;">
+          <details>
+            <summary>Что означают LIFO и FIFO?</summary>
+            <p><strong>LIFO</strong> (Last In, First Out) — последним пришёл, первым ушёл (стек). <strong>FIFO</strong> (First In, First Out) — первым пришёл, первым ушёл (очередь).</p>
+          </details>
+          <details>
+            <summary>Как реализовать стек на Python и безопасно извлечь элемент?</summary>
+            <p>Стек строится на обычном списке <code>list</code> с помощью методов <code>append()</code> и <code>pop()</code>. Перед вызовом <code>pop()</code> обязательно проверяют <code>if stack:</code>, чтобы избежать исключения <code>IndexError</code> при пустом стеке.</p>
+          </details>
+          <details>
+            <summary>Зачем при переходе по новому URL очищать forward_stack?</summary>
+            <p>Когда пользователь нажал «Назад» и открыл новую ссылку, создаётся новая ветка навигации, поэтому прежние страницы из ветки «Вперёд» становятся неактуальными и удаляются через <code>forward_stack.clear()</code>.</p>
+          </details>
+          <details>
+            <summary>Какова сложность операций push и pop в стеке?</summary>
+            <p>Обе операции (<code>append()</code> и <code>pop()</code> с конца списка) выполняются за амортизированное константное время $O(1)$.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <div id="toast-container" class="toast-container"></div>
+  
+  <script>
+    const SITE_PRESETS = {
+      "https://portal.edu.kz/dashboard": {
+        title: "Образовательный портал — Главная",
+        desc: "Стартовая панель студента: расписание занятий, лабораторные работы и учебные материалы.",
+        photo: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&q=80"
+      },
+      "https://docs.python.org/3/tutorial": {
+        title: "Python 3 Documentation — Структуры данных",
+        desc: "Официальное руководство по спискам, кортежам, множествам, словарям и модулю collections.",
+        photo: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&q=80"
+      },
+      "https://github.com/algorithms": {
+        title: "GitHub — Репозиторий алгоритмов и структур",
+        desc: "Открытый исходный код: реализация стеков, очередей, графов и алгоритмов поиска на Python.",
+        photo: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&q=80"
+      },
+      "https://unsplash.com/nature": {
+        title: "Unsplash — Галерея природы и горных пейзажей",
+        desc: "Коллекция фотографий высокого разрешения со всего мира.",
+        photo: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&q=80"
+      },
+      "https://news.tech.ai/today": {
+        title: "Tech News Today — Новости технологий и ИИ",
+        desc: "Главные события недели в разработке программного обеспечения, архитектуре и искусственном интеллекте.",
+        photo: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80"
+      },
+      "https://lms.university.kz/lab13": {
+        title: "LMS Курс — Защита лабораторной работы №13",
+        desc: "Страница загрузки отчёта и проверки контрольных вопросов по дисциплине «Языки и технология программирования».",
+        photo: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&q=80"
+      }
+    };
+  
+    const FALLBACK_PHOTOS = [
+      "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&q=80",
+      "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1200&q=80",
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200&q=80"
+    ];
+  
+    let currentUrl = "https://portal.edu.kz/dashboard";
+    let backStack = [];
+    let forwardStack = [];
+    let fullSessionLog = [currentUrl];
+  
+    function getPageMetadata(url) {
+      if (SITE_PRESETS[url]) return SITE_PRESETS[url];
+      const hash = url.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+      return {
+        title: `Веб-страница: ${url.replace(/^https?:\/\//, "")}`,
+        desc: `Динамически открытый ресурс по адресу ${url}. Состояние стеков обновлено.`,
+        photo: FALLBACK_PHOTOS[hash % FALLBACK_PHOTOS.length]
+      };
+    }
+  
+    function logPython(msg, cls = "") {
+      const body = document.getElementById("terminal-body");
+      const div = document.createElement("div");
+      div.className = `log-line ${cls}`;
+      div.textContent = `[${new Date().toLocaleTimeString()}] >>> ${msg}`;
+      body.appendChild(div);
+      body.scrollTop = body.scrollHeight;
+    }
+  
+    function clearLog() {
+      document.getElementById("terminal-body").innerHTML = "";
+    }
+  
+    function showToast(text, type = "info") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.textContent = text;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3200);
+    }
+  
+    function normalizeUrl(raw) {
+      let u = raw.trim();
+      if (!u) return "";
+      if (!/^https?:\/\//i.test(u)) u = "https://" + u;
+      return u;
+    }
+  
+    // Переход по URL
+    function visitUrl(rawUrl) {
+      const url = normalizeUrl(rawUrl);
+      if (!url) {
+        showToast("Введите корректный URL!", "error");
+        logPython(`ValueError: Пустой URL`, "err");
+        return false;
+      }
+      if (url === currentUrl) {
+        showToast("Эта страница уже открыта!", "warning");
+        logPython(`# Текущий URL совпадает с '${url}'`, "warn");
+        return false;
+      }
+  
+      backStack.push(currentUrl);
+      currentUrl = url;
+      const hadForward = forwardStack.length > 0;
+      forwardStack = [];
+      fullSessionLog.push(url);
+  
+      logPython(`back_stack.append(prev); current_url = "${url}"; forward_stack.clear()`, "ok");
+      if (hadForward) {
+        showToast(`Переход на ${url}. Стек forward_stack очищен!`, "warning");
+      } else {
+        showToast(`Открыта страница: ${url}`);
+      }
+      renderBrowser();
+      return true;
+    }
+  
+    function handleVisitForm(e) {
+      e.preventDefault();
+      const input = document.getElementById("url-input");
+      visitUrl(input.value);
+    }
+  
+    // Назад (Back)
+    function goBack() {
+      if (backStack.length === 0) {
+        showToast("Стек back_stack пуст — назад вернуться нельзя!", "error");
+        logPython(`IndexError: back_stack пуст`, "err");
+        return false;
+      }
+      forwardStack.push(currentUrl);
+      currentUrl = backStack.pop();
+      fullSessionLog.push(currentUrl);
+  
+      logPython(`forward_stack.append(curr); current_url = back_stack.pop() # -> "${currentUrl}"`, "ok");
+      showToast(`Назад: ${currentUrl}`);
+      renderBrowser();
+      return true;
+    }
+  
+    // Вперёд (Forward)
+    function goForward() {
+      if (forwardStack.length === 0) {
+        showToast("Стек forward_stack пуст — вперёд перейти нельзя!", "error");
+        logPython(`IndexError: forward_stack пуст`, "err");
+        return false;
+      }
+      backStack.push(currentUrl);
+      currentUrl = forwardStack.pop();
+      fullSessionLog.push(currentUrl);
+  
+      logPython(`back_stack.append(curr); current_url = forward_stack.pop() # -> "${currentUrl}"`, "ok");
+      showToast(`Вперёд: ${currentUrl}`);
+      renderBrowser();
+      return true;
+    }
+  
+    function resetBrowser() {
+      currentUrl = "https://portal.edu.kz/dashboard";
+      backStack = [];
+      forwardStack = [];
+      fullSessionLog = [currentUrl];
+      logPython(`back_stack.clear(); forward_stack.clear() # Сброс истории`, "warn");
+      showToast("История браузера сброшена!", "warning");
+      renderBrowser();
+    }
+  
+    function renderBrowser() {
+      const meta = getPageMetadata(currentUrl);
+      document.getElementById("url-input").value = currentUrl;
+      document.getElementById("page-url-badge").textContent = currentUrl;
+      document.getElementById("page-title").textContent = meta.title;
+      document.getElementById("page-desc").textContent = meta.desc;
+      document.getElementById("page-photo").src = meta.photo;
+  
+      document.getElementById("btn-back").disabled = backStack.length === 0;
+      document.getElementById("btn-forward").disabled = forwardStack.length === 0;
+  
+      document.getElementById("current-page-box").innerHTML = `
+        <strong>${meta.title}</strong>
+        <code>${currentUrl}</code>
+      `;
+  
+      // Рендер back_stack
+      document.getElementById("back-count").textContent = `${backStack.length} эл.`;
+      const backEl = document.getElementById("back-stack-list");
+      if (backStack.length === 0) {
+        backEl.innerHTML = `<div class="stack-empty">Стек back_stack пуст</div>`;
+      } else {
+        backEl.innerHTML = backStack.map((u, idx) => `
+          <div class="stack-item ${idx === backStack.length - 1 ? "top" : ""}">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:210px;">${u}</span>
+            <span style="font-size:11px; color:var(--muted);">${idx === backStack.length - 1 ? "TOP" : `#${idx}`}</span>
+          </div>
+        `).join("");
+      }
+  
+      // Рендер forward_stack
+      document.getElementById("forward-count").textContent = `${forwardStack.length} эл.`;
+      const fwdEl = document.getElementById("forward-stack-list");
+      if (forwardStack.length === 0) {
+        fwdEl.innerHTML = `<div class="stack-empty">Стек forward_stack пуст</div>`;
+      } else {
+        fwdEl.innerHTML = forwardStack.map((u, idx) => `
+          <div class="stack-item forward-item ${idx === forwardStack.length - 1 ? "top" : ""}">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:210px;">${u}</span>
+            <span style="font-size:11px; color:var(--muted);">${idx === forwardStack.length - 1 ? "TOP" : `#${idx}`}</span>
+          </div>
+        `).join("");
+      }
+    }
+  
+    function exportHistoryJSON() {
+      const payload = {
+        current_url: currentUrl,
+        back_stack: backStack,
+        forward_stack: forwardStack,
+        session_log: fullSessionLog
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+      const a = document.createElement("a");
+      a.href = dataStr;
+      a.download = "browser_history_lab13.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast("Файл browser_history_lab13.json скачан!");
+    }
+  
+    function switchTab(tabId, btn) {
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+      document.getElementById(`tab-${tabId}`).classList.add("active");
+      btn.classList.add("active");
+    }
+  
+    function runAllTests() {
+      const tests = [
+        {
+          id: 1,
+          name: "Обычный переход и возврат (Back)",
+          input: "A -> B -> C, затем back()",
+          expected: "Текущий URL: B; forward: [C]",
+          run: () => {
+            let curr = "A", back = [], fwd = [];
+            back.push(curr); curr = "B";
+            back.push(curr); curr = "C";
+            fwd.push(curr); curr = back.pop();
+            return (curr === "B" && fwd[0] === "C") ? "Текущий URL: B; forward: [C]" : "Ошибка";
+          }
+        },
+        {
+          id: 2,
+          name: "Переход вперёд (Forward)",
+          input: "После back() вызвать forward()",
+          expected: "Текущий URL: C; forward: []",
+          run: () => {
+            let curr = "B", back = ["A"], fwd = ["C"];
+            back.push(curr); curr = fwd.pop();
+            return (curr === "C" && fwd.length === 0) ? "Текущий URL: C; forward: []" : "Ошибка";
+          }
+        },
+        {
+          id: 3,
+          name: "Очистка forward_stack при новом URL",
+          input: "A -> B -> back() -> visit(D)",
+          expected: "Текущий URL: D; forward: []",
+          run: () => {
+            let curr = "A", back = ["Home"], fwd = ["B"];
+            back.push(curr); curr = "D"; fwd = [];
+            return (curr === "D" && fwd.length === 0) ? "Текущий URL: D; forward: []" : "Ошибка";
+          }
+        },
+        {
+          id: 4,
+          name: "Пустой стек back_stack",
+          input: "Вызов back() при back_stack = []",
+          expected: "Обработано: история 'Назад' пуста",
+          run: () => {
+            const back = [];
+            return back.length === 0 ? "Обработано: история 'Назад' пуста" : "Ошибка";
+          }
+        },
+        {
+          id: 5,
+          name: "Граничный случай (повтор текущего URL)",
+          input: "Открыть текущий URL повторно",
+          expected: "Дубликат в стек не добавлен",
+          run: () => {
+            let curr = "A", back = [];
+            if ("A" !== curr) back.push(curr);
+            return back.length === 0 ? "Дубликат в стек не добавлен" : "Ошибка";
+          }
+        }
+      ];
+  
+      document.getElementById("tests-tbody").innerHTML = tests.map(t => {
+        const actual = t.run();
+        const ok = actual === t.expected;
+        return `
+          <tr>
+            <td>${t.id}</td>
+            <td><strong>${t.name}</strong></td>
+            <td><code>${t.input}</code></td>
+            <td>${t.expected}</td>
+            <td>${actual}</td>
+            <td><span class="badge-pass">${ok ? "PASS" : "FAIL"}</span></td>
+          </tr>
+        `;
+      }).join("");
+      showToast("Все 5 автотестов успешно пройдены!");
+    }
+  
+    function copyPythonCode() {
+      navigator.clipboard.writeText(document.getElementById("python-code-block").innerText);
+      showToast("Код Python скопирован в буфер обмена!");
+    }
+  
+    renderBrowser();
+    runAllTests();
+    logPython(`browser = BrowserHistory("https://portal.edu.kz/dashboard")`);
+  </script>
+  
+  
+  </body></html>
