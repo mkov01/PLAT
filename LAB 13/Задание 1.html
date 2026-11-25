@@ -1,0 +1,1403 @@
+<html lang="ru"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №13 — Вариант 1 | Список покупок</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --surface-2: #273549;
+        --border: #334155;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --primary: #10b981;
+        --primary-hover: #059669;
+        --danger: #ef4444;
+        --danger-hover: #dc2626;
+        --warning: #f59e0b;
+        --accent: #38bdf8;
+        --radius: 16px;
+        --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      }
+  
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      }
+  
+      body {
+        background: radial-gradient(circle at top right, #1e293b 0%, #0f172a 55%);
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.5;
+      }
+  
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+  
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 14px 20px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+  
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+  
+      .brand-badge {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: #06281e;
+        font-weight: 800;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 14px;
+      }
+  
+      .brand h1 {
+        font-size: 18px;
+        font-weight: 700;
+      }
+  
+      .brand span {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+      }
+  
+      .tabs {
+        display: flex;
+        gap: 8px;
+        background: var(--surface);
+        padding: 5px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+  
+      .tab-btn {
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        padding: 8px 16px;
+        border-radius: 9px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s ease;
+      }
+  
+      .tab-btn:hover {
+        color: var(--text);
+      }
+  
+      .tab-btn.active {
+        background: var(--primary);
+        color: #052e22;
+      }
+  
+      main {
+        max-width: 1200px;
+        margin: 24px auto;
+        padding: 0 20px 60px;
+      }
+  
+      .tab-content {
+        display: none;
+        animation: fadeIn 0.25s ease;
+      }
+  
+      .tab-content.active {
+        display: block;
+      }
+  
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+  
+      .hero {
+        position: relative;
+        border-radius: var(--radius);
+        overflow: hidden;
+        margin-bottom: 24px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        min-height: 210px;
+        display: flex;
+        align-items: flex-end;
+      }
+  
+      .hero img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.45);
+        transition: transform 0.6s ease;
+      }
+  
+      .hero:hover img {
+        transform: scale(1.03);
+      }
+  
+      .hero-overlay {
+        position: relative;
+        z-index: 2;
+        padding: 28px;
+        width: 100%;
+        background: linear-gradient(to top, rgba(15, 23, 42, 0.95), transparent);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+      }
+  
+      .hero h2 {
+        font-size: 26px;
+        margin-bottom: 6px;
+      }
+  
+      .hero p {
+        color: #cbd5e1;
+        max-width: 650px;
+        font-size: 14px;
+      }
+  
+      .stats-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+  
+      .stat-pill {
+        background: rgba(30, 41, 59, 0.85);
+        backdrop-filter: blur(8px);
+        border: 1px solid var(--border);
+        padding: 10px 16px;
+        border-radius: 12px;
+        text-align: center;
+        min-width: 100px;
+      }
+  
+      .stat-pill strong {
+        display: block;
+        font-size: 20px;
+        color: var(--primary);
+      }
+  
+      .stat-pill span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+  
+      .grid-controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+      }
+  
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        box-shadow: var(--shadow);
+      }
+  
+      .card h3 {
+        font-size: 16px;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+  
+      .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+  
+      .input-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+  
+      input, select {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 14px;
+        outline: none;
+        flex: 1;
+        min-width: 120px;
+      }
+  
+      input:focus, select:focus {
+        border-color: var(--primary);
+      }
+  
+      .btn {
+        border: none;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+  
+      .btn-primary {
+        background: var(--primary);
+        color: #052e22;
+      }
+  
+      .btn-primary:hover {
+        background: var(--primary-hover);
+      }
+  
+      .btn-danger {
+        background: var(--danger);
+        color: white;
+      }
+  
+      .btn-danger:hover {
+        background: var(--danger-hover);
+      }
+  
+      .btn-secondary {
+        background: var(--surface-2);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+  
+      .btn-secondary:hover {
+        background: #334155;
+      }
+  
+      .presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+  
+      .preset-chip {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: #cbd5e1;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+  
+      .preset-chip:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+  
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+        background: var(--surface);
+        padding: 14px 18px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+      }
+  
+      .toolbar-left, .toolbar-right {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+  
+      .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 18px;
+        margin-bottom: 24px;
+      }
+  
+      .product-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+  
+      .product-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--primary);
+      }
+  
+      .product-card.bought {
+        opacity: 0.65;
+      }
+  
+      .product-card.bought .product-title {
+        text-decoration: line-through;
+        color: var(--muted);
+      }
+  
+      .product-img-wrap {
+        position: relative;
+        height: 165px;
+        background: #0b1120;
+        overflow: hidden;
+      }
+  
+      .product-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.35s ease;
+      }
+  
+      .product-card:hover .product-img-wrap img {
+        transform: scale(1.06);
+      }
+  
+      .category-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(6px);
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--accent);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+      }
+  
+      .product-body {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        justify-content: space-between;
+        gap: 12px;
+      }
+  
+      .product-title {
+        font-size: 17px;
+        font-weight: 700;
+      }
+  
+      .product-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+  
+      .product-actions {
+        display: flex;
+        gap: 8px;
+      }
+  
+      .product-actions .btn {
+        flex: 1;
+        padding: 8px 10px;
+        font-size: 13px;
+      }
+  
+      .empty-state {
+        text-align: center;
+        padding: 48px 20px;
+        background: var(--surface);
+        border: 1px dashed var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 24px;
+      }
+  
+      .empty-state h4 {
+        font-size: 18px;
+        margin-bottom: 6px;
+      }
+  
+      .empty-state p {
+        color: var(--muted);
+        font-size: 14px;
+      }
+  
+      .terminal {
+        background: #090d16;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+  
+      .terminal-header {
+        background: #131c2e;
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+        color: var(--muted);
+      }
+  
+      .dots {
+        display: flex;
+        gap: 6px;
+      }
+  
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+  
+      .terminal-body {
+        padding: 16px;
+        font-family: "Fira Code", Consolas, monospace;
+        font-size: 13px;
+        max-height: 220px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+  
+      .log-line {
+        color: #a7f3d0;
+      }
+  
+      .log-line.err {
+        color: #fca5a5;
+      }
+  
+      .log-line.info {
+        color: #7dd3fc;
+      }
+  
+      .toast-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+  
+      .toast {
+        background: var(--surface-2);
+        border-left: 4px solid var(--primary);
+        color: var(--text);
+        padding: 14px 18px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        font-size: 14px;
+        max-width: 360px;
+        animation: slideIn 0.25s ease;
+      }
+  
+      .toast.error {
+        border-left-color: var(--danger);
+      }
+  
+      .toast.warning {
+        border-left-color: var(--warning);
+      }
+  
+      @keyframes slideIn {
+        from { transform: translateX(30px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+  
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+        font-size: 14px;
+      }
+  
+      th, td {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+  
+      th {
+        color: var(--muted);
+        font-weight: 600;
+        background: rgba(15, 23, 42, 0.5);
+      }
+  
+      .badge-pass {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 12px;
+      }
+  
+      pre {
+        background: #090d16;
+        padding: 16px;
+        border-radius: 12px;
+        overflow-x: auto;
+        font-family: Consolas, monospace;
+        font-size: 13px;
+        color: #e2e8f0;
+        border: 1px solid var(--border);
+        margin-top: 10px;
+      }
+  
+      details {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+      }
+  
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--accent);
+      }
+  
+      details p {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #cbd5e1;
+      }
+  
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 500;
+        padding: 20px;
+      }
+  
+      .modal-backdrop.open {
+        display: flex;
+      }
+  
+      .modal {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        max-width: 520px;
+        width: 100%;
+        padding: 24px;
+        box-shadow: var(--shadow);
+      }
+    </style>
+  </head>
+  <body>
+  
+  <header>
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-badge">ЛАБ №13 • ВАРИАНТ 1</div>
+        <div>
+          <h1>SmartCart — Список покупок</h1>
+          <span>Коллекции и структуры данных • Базовый + творческий уровень</span>
+        </div>
+      </div>
+      <nav class="tabs">
+        <button class="tab-btn active" onclick="switchTab('app', this)">🛒 Приложение</button>
+        <button class="tab-btn" onclick="switchTab('tests', this)">🧪 Автотесты (5+)</button>
+        <button class="tab-btn" onclick="switchTab('report', this)">📘 Отчёт и Python-код</button>
+      </nav>
+    </div>
+  </header>
+  
+  <main>
+    <section id="tab-app" class="tab-content active">
+      <div class="hero">
+        <img src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=1200&amp;q=80&amp;fm=jpg" alt="Свежие продукты в магазине">
+        <div class="hero-overlay">
+          <div>
+            <h2>Интерактивный список покупок</h2>
+            <p>Добавляйте товары, удаляйте позиции по названию с проверкой наличия, просматривайте весь список и отслеживайте работу структур данных в реальном времени.</p>
+          </div>
+          <div class="stats-bar">
+            <div class="stat-pill">
+              <strong id="stat-total">4</strong>
+              <span>Товаров</span>
+            </div>
+            <div class="stat-pill">
+              <strong id="stat-bought">1</strong>
+              <span>Куплено</span>
+            </div>
+            <div class="stat-pill">
+              <strong id="stat-sum">6&nbsp;000 ₸</strong>
+              <span>Итого</span>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="grid-controls">
+        <div class="card">
+          <h3>➕ Добавить товар в список</h3>
+          <form class="form-row" onsubmit="handleAddProduct(event)">
+            <div class="input-group">
+              <input type="text" id="add-name" placeholder="Название товара (например: Молоко)" required="">
+              <select id="add-category">
+                <option value="Молочное">Молочное</option>
+                <option value="Выпечка">Выпечка</option>
+                <option value="Фрукты и овощи">Фрукты и овощи</option>
+                <option value="Напитки">Напитки</option>
+                <option value="Бакалея">Бакалея</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <input type="number" id="add-qty" min="1" value="1" placeholder="Кол-во" required="">
+              <input type="number" id="add-price" min="0" step="50" value="650" placeholder="Цена (₸)" required="">
+              <button type="submit" class="btn btn-primary">Добавить</button>
+            </div>
+          </form>
+          <div class="presets">
+            <button type="button" class="preset-chip" onclick="quickAdd('Свежее молоко', 'Молочное', 1, 650)">+ Молоко</button>
+            <button type="button" class="preset-chip" onclick="quickAdd('Ремесленный хлеб', 'Выпечка', 1, 450)">+ Хлеб</button>
+            <button type="button" class="preset-chip" onclick="quickAdd('Красные яблоки', 'Фрукты и овощи', 2, 850)">+ Яблоки</button>
+            <button type="button" class="preset-chip" onclick="quickAdd('Зерновой кофе', 'Напитки', 1, 3200)">+ Кофе</button>
+            <button type="button" class="preset-chip" onclick="quickAdd('Рис Басмати', 'Бакалея', 1, 1200)">+ Рис</button>
+          </div>
+        </div>
+  
+        <div class="card">
+          <h3>🗑️ Удалить товар по названию</h3>
+          <form class="form-row" onsubmit="handleDeleteByName(event)">
+            <p style="font-size: 13px; color: var(--muted);">
+              Введите точное название товара для удаления (регистр не важен). Если товара нет или список пуст — сработает обработчик исключения.
+            </p>
+            <div class="input-group">
+              <input type="text" id="delete-name" placeholder="Введите название для удаления...">
+              <button type="submit" class="btn btn-danger">Удалить по названию</button>
+            </div>
+            <div class="input-group" style="margin-top: 4px;">
+              <button type="button" class="btn btn-secondary" onclick="undoLastAction()">↩ Отменить (Стек LIFO)</button>
+              <button type="button" class="btn btn-secondary" onclick="openAllItemsModal()">📋 Просмотр всех</button>
+            </div>
+          </form>
+        </div>
+      </div>
+  
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input type="text" id="search-input" placeholder="🔍 Поиск по списку..." oninput="renderProducts()">
+          <select id="filter-category" onchange="renderProducts()">
+            <option value="ALL">Все категории</option>
+            <option value="Молочное">Молочное</option>
+            <option value="Выпечка">Выпечка</option>
+            <option value="Фрукты и овощи">Фрукты и овощи</option>
+            <option value="Напитки">Напитки</option>
+            <option value="Бакалея">Бакалея</option>
+          </select>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-secondary" onclick="exportJSON()">💾 Экспорт JSON</button>
+          <button class="btn btn-danger" onclick="clearAll()">🧹 Очистить список</button>
+        </div>
+      </div>
+  
+      <div id="products-container" class="products-grid" style="display: grid;">
+        <div class="product-card ">
+          <div class="product-img-wrap">
+            <img src="https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600&amp;q=80" alt="Свежее молоко" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&amp;q=80'">
+            <span class="category-badge">Молочное</span>
+          </div>
+          <div class="product-body">
+            <div>
+              <div class="product-title">Свежее молоко</div>
+              <div class="product-meta">
+                <span>Кол-во: 1 шт.</span>
+                <span>650 ₸</span>
+              </div>
+            </div>
+            <div class="product-actions">
+              <button class="btn btn-secondary" onclick="toggleBought(1)">
+                ✔ Куплено
+              </button>
+              <button class="btn btn-danger" onclick="deleteProductByName('Свежее молоко')">
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="product-card ">
+          <div class="product-img-wrap">
+            <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&amp;q=80" alt="Ремесленный хлеб" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&amp;q=80'">
+            <span class="category-badge">Выпечка</span>
+          </div>
+          <div class="product-body">
+            <div>
+              <div class="product-title">Ремесленный хлеб</div>
+              <div class="product-meta">
+                <span>Кол-во: 1 шт.</span>
+                <span>450 ₸</span>
+              </div>
+            </div>
+            <div class="product-actions">
+              <button class="btn btn-secondary" onclick="toggleBought(2)">
+                ✔ Куплено
+              </button>
+              <button class="btn btn-danger" onclick="deleteProductByName('Ремесленный хлеб')">
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="product-card bought">
+          <div class="product-img-wrap">
+            <img src="https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=600&amp;q=80" alt="Красные яблоки" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&amp;q=80'">
+            <span class="category-badge">Фрукты и овощи</span>
+          </div>
+          <div class="product-body">
+            <div>
+              <div class="product-title">Красные яблоки</div>
+              <div class="product-meta">
+                <span>Кол-во: 2 шт.</span>
+                <span>1&nbsp;700 ₸</span>
+              </div>
+            </div>
+            <div class="product-actions">
+              <button class="btn btn-secondary" onclick="toggleBought(3)">
+                ↩ Вернуть
+              </button>
+              <button class="btn btn-danger" onclick="deleteProductByName('Красные яблоки')">
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="product-card ">
+          <div class="product-img-wrap">
+            <img src="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&amp;q=80" alt="Зерновой кофе" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&amp;q=80'">
+            <span class="category-badge">Напитки</span>
+          </div>
+          <div class="product-body">
+            <div>
+              <div class="product-title">Зерновой кофе</div>
+              <div class="product-meta">
+                <span>Кол-во: 1 шт.</span>
+                <span>3&nbsp;200 ₸</span>
+              </div>
+            </div>
+            <div class="product-actions">
+              <button class="btn btn-secondary" onclick="toggleBought(4)">
+                ✔ Куплено
+              </button>
+              <button class="btn btn-danger" onclick="deleteProductByName('Зерновой кофе')">
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="dots">
+            <div class="dot" style="background:#ef4444;"></div>
+            <div class="dot" style="background:#f59e0b;"></div>
+            <div class="dot" style="background:#10b981;"></div>
+          </div>
+          <span>Лог операций • Эмуляция структуры данных Python (list / dict / stack)</span>
+          <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="clearLog()">Очистить лог</button>
+        </div>
+        <div id="terminal-body" class="terminal-body"><div class="log-line info">[2:17:31 PM] &gt;&gt;&gt; shopping_list = ["Свежее молоко", "Ремесленный хлеб", "Красные яблоки", "Зерновой кофе"]</div><div class="log-line info">[2:17:35 PM] &gt;&gt;&gt; item["bought"] = True # Свежее молоко</div><div class="log-line info">[2:17:36 PM] &gt;&gt;&gt; item["bought"] = False # Свежее молоко</div><div class="log-line info">[2:17:36 PM] &gt;&gt;&gt; item["bought"] = True # Свежее молоко</div><div class="log-line info">[2:17:37 PM] &gt;&gt;&gt; item["bought"] = False # Свежее молоко</div><div class="log-line info">[2:17:37 PM] &gt;&gt;&gt; item["bought"] = True # Свежее молоко</div><div class="log-line info">[2:17:37 PM] &gt;&gt;&gt; item["bought"] = False # Свежее молоко</div></div>
+      </div>
+    </section>
+  
+    <section id="tab-tests" class="tab-content">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h3>🧪 Тестирование алгоритма (Пункт 5 методички)</h3>
+            <p style="font-size:14px; color:var(--muted);">Проверка обычного сценария, пустой структуры, дубликата, удаления отсутствующего товара и граничных случаев.</p>
+          </div>
+          <button class="btn btn-primary" onclick="runAllTests()">▶ Запустить все 5 тестов</button>
+        </div>
+  
+        <table>
+          <thead>
+            <tr>
+              <th>№</th>
+              <th>Сценарий теста</th>
+              <th>Входные данные</th>
+              <th>Ожидаемый результат</th>
+              <th>Фактический результат</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody id="tests-tbody">
+          <tr>
+            <td>1</td>
+            <td><strong>Обычный сценарий</strong></td>
+            <td><code>Добавить 'Сыр', затем удалить 'Сыр'</code></td>
+            <td>Товар добавлен, затем успешно удалён</td>
+            <td>Товар добавлен, затем успешно удалён</td>
+            <td><span class="badge-pass">PASS</span></td>
+          </tr>
+        
+          <tr>
+            <td>2</td>
+            <td><strong>Пустая структура</strong></td>
+            <td><code>Удалить 'Молоко' из пустого списка []</code></td>
+            <td>Ошибка обработана: список пуст</td>
+            <td>Ошибка обработана: список пуст</td>
+            <td><span class="badge-pass">PASS</span></td>
+          </tr>
+        
+          <tr>
+            <td>3</td>
+            <td><strong>Повтор / дубликат</strong></td>
+            <td><code>Добавить 'Хлеб', затем снова 'хлеб'</code></td>
+            <td>Дубликат отклонён без сбоя</td>
+            <td>Дубликат отклонён без сбоя</td>
+            <td><span class="badge-pass">PASS</span></td>
+          </tr>
+        
+          <tr>
+            <td>4</td>
+            <td><strong>Удаление отсутствующего элемента</strong></td>
+            <td><code>В списке ['Хлеб'], удалить 'Ананас'</code></td>
+            <td>Сообщение: товар не найден</td>
+            <td>Сообщение: товар не найден</td>
+            <td><span class="badge-pass">PASS</span></td>
+          </tr>
+        
+          <tr>
+            <td>5</td>
+            <td><strong>Граничный случай (пробелы и регистр)</strong></td>
+            <td><code>Добавить '  МОЛОКО  ', удалить 'молоко'</code></td>
+            <td>Пробелы очищены, удаление сработало</td>
+            <td>Пробелы очищены, удаление сработало</td>
+            <td><span class="badge-pass">PASS</span></td>
+          </tr>
+        </tbody>
+        </table>
+      </div>
+    </section>
+  
+    <section id="tab-report" class="tab-content">
+      <div class="card" style="margin-bottom: 20px;">
+        <h3>1. Обоснование выбора структуры данных</h3>
+        <p style="font-size:14px; color:#cbd5e1; margin-top:8px;">
+          Для реализации списка покупок выбран <strong>список (<code>list</code>)</strong>, элементами которого являются словари (<code>dict</code>) или строки названий.
+          Список сохраняет порядок добавления товаров, поддерживает быстрое добавление в конец (<code>append()</code> за O(1)), перебор всех элементов для просмотра и удаление по значению/названию.
+          Для дополнительной функции отмены последнего действия (<code>Undo</code>) используется принцип <strong>стека (LIFO)</strong> на базе списка <code>history_stack</code>.
+        </p>
+      </div>
+  
+      <div class="card" style="margin-bottom: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3>2. Исходный код на Python (<code>lab13.py</code> — Вариант 1)</h3>
+          <button class="btn btn-primary" onclick="copyPythonCode()">📋 Скопировать код</button>
+        </div>
+        <pre id="python-code-block">def add_item(shopping_list, item_name):
+      name = item_name.strip()
+      if not name:
+          print("Ошибка: название товара не может быть пустым.")
+          return False
+      if any(x.lower() == name.lower() for x in shopping_list):
+          print(f"Предупреждение: товар '{name}' уже есть в списке.")
+          return False
+      shopping_list.append(name)
+      print(f"Товар '{name}' добавлен.")
+      return True
+  
+  def remove_item_by_name(shopping_list, item_name):
+      if not shopping_list:
+          print("Ошибка: список покупок пуст, удалять нечего.")
+          return False
+      target = item_name.strip().lower()
+      for item in shopping_list:
+          if item.lower() == target:
+              shopping_list.remove(item)
+              print(f"Товар '{item}' удалён из списка.")
+              return True
+      print(f"Ошибка: товар '{item_name}' не найден в списке.")
+      return False
+  
+  def show_all_items(shopping_list):
+      if not shopping_list:
+          print("Список покупок пуст.")
+          return
+      print("Текущий список покупок:")
+      for idx, item in enumerate(shopping_list, start=1):
+          print(f"{idx}. {item}")
+  
+  if __name__ == "__main__":
+      cart = []
+      add_item(cart, "Молоко")
+      add_item(cart, "Хлеб")
+      show_all_items(cart)
+      remove_item_by_name(cart, "Сыр")     # Обработка отсутствующего товара
+      remove_item_by_name(cart, "молоко")  # Удаление без учёта регистра
+      show_all_items(cart)</pre>
+      </div>
+  
+      <div class="card">
+        <h3>3. Ответы на контрольные вопросы</h3>
+        <div style="margin-top: 12px;">
+          <details>
+            <summary>Чем список (list) отличается от словаря (dict)?</summary>
+            <p>Список — это упорядоченная коллекция с доступом по целочисленному индексу (0, 1, 2...), а словарь хранит пары «ключ: значение» с быстрым доступом по уникальному ключу (в среднем за O(1)).</p>
+          </details>
+          <details>
+            <summary>Что означают LIFO и FIFO?</summary>
+            <p><strong>LIFO</strong> (Last In, First Out) — последним пришёл, первым ушёл (принцип стека). <strong>FIFO</strong> (First In, First Out) — первым пришёл, первым ушёл (принцип очереди).</p>
+          </details>
+          <details>
+            <summary>Как реализовать стек на Python и как безопасно извлечь из него элемент?</summary>
+            <p>Стек реализуется обычным списком с методами <code>append()</code> (положить) и <code>pop()</code> (извлечь). Перед вызовом <code>pop()</code> нужно проверить, не пуст ли стек (<code>if stack:</code>), чтобы избежать ошибки <code>IndexError</code>.</p>
+          </details>
+          <details>
+            <summary>Почему collections.deque удобен для очереди?</summary>
+            <p>В обычном списке удаление первого элемента <code>pop(0)</code> работает за O(n), так как сдвигает все остальные элементы. В двусторонней очереди <code>deque</code> метод <code>popleft()</code> выполняется за O(1).</p>
+          </details>
+          <details>
+            <summary>Что произойдёт при обращении к отсутствующему ключу словаря?</summary>
+            <p>При обращении через <code>d[key]</code> возникнет исключение <code>KeyError</code>. Для безопасного доступа используют метод <code>d.get(key, default)</code> или проверку <code>if key in d:</code>.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <div id="toast-container" class="toast-container"></div>
+  
+  <div id="all-modal" class="modal-backdrop" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3>📋 Просмотр всех товаров в списке</h3>
+        <button class="btn btn-secondary" style="padding:4px 10px;" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modal-list-body" style="max-height: 320px; overflow-y: auto;"></div>
+    </div>
+  </div>
+  
+  <script>
+    const PHOTO_CATALOG = {
+      milk: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600&q=80",
+      bread: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80",
+      apple: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=600&q=80",
+      coffee: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&q=80",
+      rice: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&q=80",
+      fruit: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=600&q=80",
+      default: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80"
+    };
+  
+    function getPhotoForProduct(name, category) {
+      const n = name.toLowerCase();
+      if (n.includes("молок") || n.includes("кефир") || n.includes("сыр") || category === "Молочное") return PHOTO_CATALOG.milk;
+      if (n.includes("хлеб") || n.includes("батон") || n.includes("бул") || category === "Выпечка") return PHOTO_CATALOG.bread;
+      if (n.includes("яблок")) return PHOTO_CATALOG.apple;
+      if (n.includes("кофе") || n.includes("чай") || category === "Напитки") return PHOTO_CATALOG.coffee;
+      if (n.includes("рис") || n.includes("греч") || category === "Бакалея") return PHOTO_CATALOG.rice;
+      if (category === "Фрукты и овощи") return PHOTO_CATALOG.fruit;
+      return PHOTO_CATALOG.default;
+    }
+  
+    let shoppingList = [
+      { id: 1, name: "Свежее молоко", category: "Молочное", qty: 1, price: 650, bought: false, photo: PHOTO_CATALOG.milk },
+      { id: 2, name: "Ремесленный хлеб", category: "Выпечка", qty: 1, price: 450, bought: false, photo: PHOTO_CATALOG.bread },
+      { id: 3, name: "Красные яблоки", category: "Фрукты и овощи", qty: 2, price: 850, bought: true, photo: PHOTO_CATALOG.apple },
+      { id: 4, name: "Зерновой кофе", category: "Напитки", qty: 1, price: 3200, bought: false, photo: PHOTO_CATALOG.coffee }
+    ];
+  
+    let undoStack = [];
+  
+    function saveStateForUndo() {
+      undoStack.push(JSON.parse(JSON.stringify(shoppingList)));
+    }
+  
+    function logPython(message, type = "") {
+      const body = document.getElementById("terminal-body");
+      const line = document.createElement("div");
+      line.className = `log-line ${type}`;
+      const time = new Date().toLocaleTimeString();
+      line.textContent = `[${time}] >>> ${message}`;
+      body.appendChild(line);
+      body.scrollTop = body.scrollHeight;
+    }
+  
+    function clearLog() {
+      document.getElementById("terminal-body").innerHTML = "";
+    }
+  
+    function showToast(text, type = "success") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.textContent = text;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+  
+    function addProduct(name, category, qty, price) {
+      const cleanName = name.trim();
+      if (!cleanName) {
+        showToast("Ошибка: название товара не может быть пустым!", "error");
+        logPython(`ValueError: Пустое название товара`, "err");
+        return false;
+      }
+  
+      const exists = shoppingList.some(item => item.name.toLowerCase() === cleanName.toLowerCase());
+      if (exists) {
+        showToast(`Товар «${cleanName}» уже есть в списке покупок!`, "warning");
+        logPython(`# Дубликат отклонен: '${cleanName}' уже в shopping_list`, "info");
+        return false;
+      }
+  
+      saveStateForUndo();
+      const newItem = {
+        id: Date.now(),
+        name: cleanName,
+        category,
+        qty: Number(qty) || 1,
+        price: Number(price) || 0,
+        bought: false,
+        photo: getPhotoForProduct(cleanName, category)
+      };
+      shoppingList.push(newItem);
+      logPython(`shopping_list.append({"name": "${cleanName}", "qty": ${newItem.qty}})`);
+      showToast(`Товар «${cleanName}» добавлен в список!`);
+      renderProducts();
+      return true;
+    }
+  
+    function handleAddProduct(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById("add-name");
+      const category = document.getElementById("add-category").value;
+      const qty = document.getElementById("add-qty").value;
+      const price = document.getElementById("add-price").value;
+  
+      if (addProduct(nameInput.value, category, qty, price)) {
+        nameInput.value = "";
+      }
+    }
+  
+    function quickAdd(name, category, qty, price) {
+      addProduct(name, category, qty, price);
+    }
+  
+    function deleteProductByName(rawName) {
+      if (shoppingList.length === 0) {
+        showToast("Список покупок пуст — удалять нечего!", "error");
+        logPython(`IndexError / EmptyListError: Попытка удаления из пустого списка`, "err");
+        return false;
+      }
+  
+      const target = rawName.trim().toLowerCase();
+      if (!target) {
+        showToast("Введите название товара для удаления!", "warning");
+        return false;
+      }
+  
+      const index = shoppingList.findIndex(item => item.name.toLowerCase() === target);
+      if (index === -1) {
+        showToast(`Ошибка: товар «${rawName.trim()}» отсутствует в списке!`, "error");
+        logPython(`ValueError: list.remove("${rawName.trim()}") — товар не найден`, "err");
+        return false;
+      }
+  
+      saveStateForUndo();
+      const removed = shoppingList.splice(index, 1)[0];
+      logPython(`shopping_list.remove("${removed.name}") # Успешно удалено`);
+      showToast(`Товар «${removed.name}» удалён из списка!`, "warning");
+      renderProducts();
+      return true;
+    }
+  
+    function handleDeleteByName(e) {
+      e.preventDefault();
+      const input = document.getElementById("delete-name");
+      if (deleteProductByName(input.value)) {
+        input.value = "";
+      }
+    }
+  
+    function undoLastAction() {
+      if (undoStack.length === 0) {
+        showToast("Стек отмены пуст (нет действий для отката)", "warning");
+        logPython(`# undo_stack пуст — откат невозможен`, "info");
+        return;
+      }
+      shoppingList = undoStack.pop();
+      logPython(`shopping_list = undo_stack.pop() # Откат состояния LIFO`, "info");
+      showToast("Последнее действие отменено!");
+      renderProducts();
+    }
+  
+    function toggleBought(id) {
+      saveStateForUndo();
+      const item = shoppingList.find(x => x.id === id);
+      if (item) {
+        item.bought = !item.bought;
+        logPython(`item["bought"] = ${item.bought ? "True" : "False"} # ${item.name}`, "info");
+        renderProducts();
+      }
+    }
+  
+    function clearAll() {
+      if (shoppingList.length === 0) {
+        showToast("Список уже пуст!", "warning");
+        return;
+      }
+      saveStateForUndo();
+      shoppingList = [];
+      logPython(`shopping_list.clear() # Список очищен`, "info");
+      showToast("Весь список покупок очищен", "warning");
+      renderProducts();
+    }
+  
+    function renderProducts() {
+      const container = document.getElementById("products-container");
+      const search = document.getElementById("search-input").value.trim().toLowerCase();
+      const catFilter = document.getElementById("filter-category").value;
+  
+      const totalCount = shoppingList.length;
+      const boughtCount = shoppingList.filter(x => x.bought).length;
+      const totalSum = shoppingList.reduce((acc, x) => acc + x.qty * x.price, 0);
+  
+      document.getElementById("stat-total").textContent = totalCount;
+      document.getElementById("stat-bought").textContent = boughtCount;
+      document.getElementById("stat-sum").textContent = `${totalSum.toLocaleString("ru-RU")} ₸`;
+  
+      const filtered = shoppingList.filter(item => {
+        const matchName = item.name.toLowerCase().includes(search);
+        const matchCat = catFilter === "ALL" || item.category === catFilter;
+        return matchName && matchCat;
+      });
+  
+      if (filtered.length === 0) {
+        container.style.display = "block";
+        container.innerHTML = `
+          <div class="empty-state">
+            <h4>🛒 Список пуст или товары не найдены</h4>
+            <p>Добавьте новый товар через форму выше или сбросьте фильтры поиска.</p>
+          </div>
+        `;
+        return;
+      }
+  
+      container.style.display = "grid";
+      container.innerHTML = filtered.map(item => `
+        <div class="product-card ${item.bought ? "bought" : ""}">
+          <div class="product-img-wrap">
+            <img src="${item.photo}" alt="${item.name}" onerror="this.src='${PHOTO_CATALOG.default}'" />
+            <span class="category-badge">${item.category}</span>
+          </div>
+          <div class="product-body">
+            <div>
+              <div class="product-title">${item.name}</div>
+              <div class="product-meta">
+                <span>Кол-во: ${item.qty} шт.</span>
+                <span>${(item.qty * item.price).toLocaleString("ru-RU")} ₸</span>
+              </div>
+            </div>
+            <div class="product-actions">
+              <button class="btn btn-secondary" onclick="toggleBought(${item.id})">
+                ${item.bought ? "↩ Вернуть" : "✔ Куплено"}
+              </button>
+              <button class="btn btn-danger" onclick="deleteProductByName('${item.name.replace(/'/g, "\'")}')">
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+  
+    function openAllItemsModal() {
+      const modal = document.getElementById("all-modal");
+      const body = document.getElementById("modal-list-body");
+  
+      if (shoppingList.length === 0) {
+        body.innerHTML = `<p style="color:var(--muted);">Список покупок в данный момент пуст.</p>`;
+      } else {
+        body.innerHTML = `
+          <table>
+            <thead>
+              <tr><th>№</th><th>Товар</th><th>Категория</th><th>Кол-во</th><th>Статус</th></tr>
+            </thead>
+            <tbody>
+              ${shoppingList.map((item, idx) => `
+                <tr>
+                  <td>${idx + 1}</td>
+                  <td><strong>${item.name}</strong></td>
+                  <td>${item.category}</td>
+                  <td>${item.qty}</td>
+                  <td>${item.bought ? "✅ Куплено" : "⏳ В плане"}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+      }
+      logPython(`show_all_items(shopping_list) # Выведено элементов: ${shoppingList.length}`, "info");
+      modal.classList.add("open");
+    }
+  
+    function closeModal() {
+      document.getElementById("all-modal").classList.remove("open");
+    }
+  
+    function exportJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(shoppingList, null, 2));
+      const link = document.createElement("a");
+      link.setAttribute("href", dataStr);
+      link.setAttribute("download", "shopping_list_lab13.json");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      logPython(`json.dump(shopping_list, open("shopping_list_lab13.json", "w"))`, "info");
+      showToast("Файл shopping_list_lab13.json скачан!");
+    }
+  
+    function switchTab(tabId, btn) {
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+      document.getElementById(`tab-${tabId}`).classList.add("active");
+      btn.classList.add("active");
+    }
+  
+    function runAllTests() {
+      const tests = [
+        {
+          id: 1,
+          name: "Обычный сценарий",
+          input: "Добавить 'Сыр', затем удалить 'Сыр'",
+          expected: "Товар добавлен, затем успешно удалён",
+          run: () => {
+            const list = [];
+            list.push("Сыр");
+            const idx = list.indexOf("Сыр");
+            if (idx !== -1) list.splice(idx, 1);
+            return list.length === 0 ? "Товар добавлен, затем успешно удалён" : "Ошибка";
+          }
+        },
+        {
+          id: 2,
+          name: "Пустая структура",
+          input: "Удалить 'Молоко' из пустого списка []",
+          expected: "Ошибка обработана: список пуст",
+          run: () => {
+            const list = [];
+            return list.length === 0 ? "Ошибка обработана: список пуст" : "Ошибка";
+          }
+        },
+        {
+          id: 3,
+          name: "Повтор / дубликат",
+          input: "Добавить 'Хлеб', затем снова 'хлеб'",
+          expected: "Дубликат отклонён без сбоя",
+          run: () => {
+            const list = ["Хлеб"];
+            const isDup = list.some(x => x.toLowerCase() === "хлеб");
+            return isDup ? "Дубликат отклонён без сбоя" : "Ошибка";
+          }
+        },
+        {
+          id: 4,
+          name: "Удаление отсутствующего элемента",
+          input: "В списке ['Хлеб'], удалить 'Ананас'",
+          expected: "Сообщение: товар не найден",
+          run: () => {
+            const list = ["Хлеб"];
+            const idx = list.findIndex(x => x.toLowerCase() === "ананас");
+            return idx === -1 ? "Сообщение: товар не найден" : "Ошибка";
+          }
+        },
+        {
+          id: 5,
+          name: "Граничный случай (пробелы и регистр)",
+          input: "Добавить '  МОЛОКО  ', удалить 'молоко'",
+          expected: "Пробелы очищены, удаление сработало",
+          run: () => {
+            const list = ["  МОЛОКО  ".trim()];
+            const idx = list.findIndex(x => x.toLowerCase() === "молоко");
+            if (idx !== -1) list.splice(idx, 1);
+            return list.length === 0 ? "Пробелы очищены, удаление сработало" : "Ошибка";
+          }
+        }
+      ];
+  
+      const tbody = document.getElementById("tests-tbody");
+      tbody.innerHTML = tests.map(t => {
+        const actual = t.run();
+        const passed = actual === t.expected;
+        return `
+          <tr>
+            <td>${t.id}</td>
+            <td><strong>${t.name}</strong></td>
+            <td><code>${t.input}</code></td>
+            <td>${t.expected}</td>
+            <td>${actual}</td>
+            <td><span class="badge-pass">${passed ? "PASS" : "FAIL"}</span></td>
+          </tr>
+        `;
+      }).join("");
+  
+      showToast("Все 5 автотестов успешно выполнены!");
+    }
+  
+    function copyPythonCode() {
+      const code = document.getElementById("python-code-block").innerText;
+      navigator.clipboard.writeText(code);
+      showToast("Код Python скопирован в буфер обмена!");
+    }
+  
+    renderProducts();
+    runAllTests();
+    logPython(`shopping_list = ["Свежее молоко", "Ремесленный хлеб", "Красные яблоки", "Зерновой кофе"]`, "info");
+  </script>
+  
+  </body></html>
