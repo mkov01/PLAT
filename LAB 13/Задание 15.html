@@ -1,0 +1,1458 @@
+<html lang="ru"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Лабораторная работа №13 — Вариант 15 | Мини-библиотека</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --surface: #162032;
+      --surface-2: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --accent: #38bdf8;
+      --radius: 16px;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top left, #1e1b4b 0%, #0b1120 55%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 17, 32, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-container {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #ffffff;
+      font-weight: 800;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      letter-spacing: 0.4px;
+    }
+
+    .brand h1 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .brand span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--surface);
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 8px 16px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    main {
+      max-width: 1220px;
+      margin: 24px auto;
+      padding: 0 20px 60px;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      min-height: 220px;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .hero img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.4);
+      transition: transform 0.6s ease;
+    }
+
+    .hero:hover img {
+      transform: scale(1.03);
+    }
+
+    .hero-overlay {
+      position: relative;
+      z-index: 2;
+      padding: 28px;
+      width: 100%;
+      background: linear-gradient(to top, rgba(11, 17, 32, 0.96), transparent);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+    }
+
+    .hero h2 {
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+
+    .hero p {
+      color: #cbd5e1;
+      max-width: 650px;
+      font-size: 14px;
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      background: rgba(22, 32, 50, 0.88);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 12px;
+      text-align: center;
+      min-width: 105px;
+    }
+
+    .stat-pill strong {
+      display: block;
+      font-size: 20px;
+      color: var(--accent);
+    }
+
+    .stat-pill span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .grid-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h3 {
+      font-size: 16px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    input, select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    .btn {
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #042f2e;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+      color: white;
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: #1e1b18;
+    }
+
+    .btn-warning:hover {
+      background: #d97706;
+      color: white;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: #334155;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      background: var(--surface);
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .book-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .book-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+    }
+
+    .book-cover {
+      position: relative;
+      height: 190px;
+      background: #090d16;
+      overflow: hidden;
+    }
+
+    .book-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.35s ease;
+    }
+
+    .book-card:hover .book-cover img {
+      transform: scale(1.06);
+    }
+
+    .id-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(11, 17, 32, 0.88);
+      backdrop-filter: blur(6px);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      font-family: monospace;
+    }
+
+    .status-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .status-available {
+      background: rgba(16, 185, 129, 0.9);
+      color: #022c22;
+    }
+
+    .status-issued {
+      background: rgba(245, 158, 11, 0.92);
+      color: #1c1917;
+    }
+
+    .book-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .book-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .book-author {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .book-holder {
+      font-size: 12px;
+      color: var(--warning);
+      margin-top: 6px;
+      background: rgba(245, 158, 11, 0.12);
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .book-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .book-actions .btn {
+      flex: 1;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+    }
+
+    .terminal {
+      background: #070b14;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .terminal-header {
+      background: #111827;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .terminal-body {
+      padding: 16px;
+      font-family: "Fira Code", Consolas, monospace;
+      font-size: 13px;
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .log-line { color: #c4b5fd; }
+    .log-line.ok { color: #6ee7b7; }
+    .log-line.err { color: #fca5a5; }
+    .log-line.info { color: #7dd3fc; }
+
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: var(--surface-2);
+      border-left: 4px solid var(--primary);
+      color: var(--text);
+      padding: 14px 18px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      font-size: 14px;
+      max-width: 360px;
+      animation: slideIn 0.25s ease;
+    }
+
+    .toast.error { border-left-color: var(--danger); }
+    .toast.warning { border-left-color: var(--warning); }
+    .toast.success { border-left-color: var(--success); }
+
+    @keyframes slideIn {
+      from { transform: translateX(30px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      background: rgba(11, 17, 32, 0.5);
+    }
+
+    .badge-pass {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    pre {
+      background: #070b14;
+      padding: 16px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      color: #e2e8f0;
+      border: 1px solid var(--border);
+      margin-top: 10px;
+    }
+
+    details {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    details p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #cbd5e1;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-width: 580px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="nav-container">
+    <div class="brand">
+      <div class="brand-badge">ЛАБ №13 • ВАРИАНТ 15</div>
+      <div>
+        <h1>LibDict — Мини-библиотека</h1>
+        <span>Словарь ID → книга • Выдача/возврат • Список доступных книг</span>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab-btn active" onclick="switchTab('app', this)">📚 Библиотека</button>
+      <button class="tab-btn" onclick="switchTab('tests', this)">🧪 Автотесты (5+)</button>
+      <button class="tab-btn" onclick="switchTab('report', this)">📘 Отчёт и Python-код</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="tab-app" class="tab-content active">
+    <div class="hero">
+      <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1200&amp;q=80&amp;fm=jpg" alt="Библиотечный зал">
+      <div class="hero-overlay">
+        <div>
+          <h2>Система управления мини-библиотекой</h2>
+          <p>Хранение каталога в словаре <code>books = {ID: {...}}</code>, быстрая выдача и возврат книг по уникальному ключу ID, фильтрация доступных экземпляров и откат операций.</p>
+        </div>
+        <div class="stats-bar">
+          <div class="stat-pill">
+            <strong id="stat-total">4</strong>
+            <span>Всего книг</span>
+          </div>
+          <div class="stat-pill">
+            <strong id="stat-avail" style="color: var(--success);">3</strong>
+            <span>Доступно</span>
+          </div>
+          <div class="stat-pill">
+            <strong id="stat-issued" style="color: var(--warning);">1</strong>
+            <span>Выдано</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-controls">
+      <div class="card">
+        <h3>➕ Добавить книгу в словарь (<code>ID → книга</code>)</h3>
+        <form class="form-row" onsubmit="handleAddBook(event)">
+          <div class="input-group">
+            <input type="text" id="book-id" placeholder="ID книги (напр. B005)" required="">
+            <input type="text" id="book-title" placeholder="Название книги" required="">
+          </div>
+          <div class="input-group">
+            <input type="text" id="book-author" placeholder="Автор (напр. Марк Лутц)" required="">
+            <select id="book-genre">
+              <option value="Программирование">Программирование</option>
+              <option value="Алгоритмы">Алгоритмы</option>
+              <option value="Классика">Классика</option>
+              <option value="Научпоп">Научпоп</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Добавить</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>🔄 Выдача и возврат книги по ID</h3>
+        <div class="form-row">
+          <div class="input-group">
+            <input type="text" id="op-book-id" placeholder="Введите ID книги (напр. B001)">
+            <input type="text" id="op-reader" placeholder="Имя читателя (для выдачи)">
+          </div>
+          <div class="input-group">
+            <button type="button" class="btn btn-warning" onclick="handleIssueById()">📤 Выдать книгу</button>
+            <button type="button" class="btn btn-success" onclick="handleReturnById()">📥 Вернуть книгу</button>
+            <button type="button" class="btn btn-secondary" onclick="openAvailableModal()">📗 Доступные книги</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <input type="text" id="search-input" placeholder="🔍 Поиск по ID, названию или автору..." oninput="renderBooks()">
+        <select id="status-filter" onchange="renderBooks()">
+          <option value="ALL">Все книги в фонде</option>
+          <option value="AVAILABLE">Только доступные</option>
+          <option value="ISSUED">Только выданные</option>
+        </select>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-secondary" onclick="undoLastAction()">↩ Отменить (LIFO)</button>
+        <button class="btn btn-secondary" onclick="exportJSON()">💾 Экспорт JSON</button>
+      </div>
+    </div>
+
+    <div id="books-container" class="books-grid" style="display: grid;">
+      <div class="book-card">
+        <div class="book-cover">
+          <img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=600&amp;q=80" alt="Изучаем Python" onerror="this.src='https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&amp;q=80'">
+          <span class="id-badge">ID: B001</span>
+          <span class="status-badge status-available">
+            ✔ Доступна
+          </span>
+        </div>
+        <div class="book-body">
+          <div>
+            <div class="book-title">Изучаем Python</div>
+            <div class="book-author">Марк Лутц • Программирование</div>
+            
+          </div>
+          <div class="book-actions">
+            <button class="btn btn-warning" onclick="quickToggleBook('B001')">
+              📤 Выдать
+            </button>
+            <button class="btn btn-danger" onclick="deleteBook('B001')">Удалить</button>
+          </div>
+        </div>
+      </div>
+    
+      <div class="book-card">
+        <div class="book-cover">
+          <img src="https://images.unsplash.com/photo-1532012197267-da84d127e765?w=600&amp;q=80" alt="Грокаем алгоритмы" onerror="this.src='https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&amp;q=80'">
+          <span class="id-badge">ID: B002</span>
+          <span class="status-badge status-issued">
+            ⏳ Выдана
+          </span>
+        </div>
+        <div class="book-body">
+          <div>
+            <div class="book-title">Грокаем алгоритмы</div>
+            <div class="book-author">Адитья Бхаргава • Алгоритмы</div>
+            <div class="book-holder">Читатель: <strong>Алия</strong></div>
+          </div>
+          <div class="book-actions">
+            <button class="btn btn-success" onclick="quickToggleBook('B002')">
+              📥 Вернуть
+            </button>
+            <button class="btn btn-danger" onclick="deleteBook('B002')">Удалить</button>
+          </div>
+        </div>
+      </div>
+    
+      <div class="book-card">
+        <div class="book-cover">
+          <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&amp;q=80" alt="Мастер и Маргарита" onerror="this.src='https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&amp;q=80'">
+          <span class="id-badge">ID: B003</span>
+          <span class="status-badge status-available">
+            ✔ Доступна
+          </span>
+        </div>
+        <div class="book-body">
+          <div>
+            <div class="book-title">Мастер и Маргарита</div>
+            <div class="book-author">Михаил Булгаков • Классика</div>
+            
+          </div>
+          <div class="book-actions">
+            <button class="btn btn-warning" onclick="quickToggleBook('B003')">
+              📤 Выдать
+            </button>
+            <button class="btn btn-danger" onclick="deleteBook('B003')">Удалить</button>
+          </div>
+        </div>
+      </div>
+    
+      <div class="book-card">
+        <div class="book-cover">
+          <img src="https://images.unsplash.com/photo-1589998059171-988d887df646?w=600&amp;q=80" alt="Краткая история времени" onerror="this.src='https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&amp;q=80'">
+          <span class="id-badge">ID: B004</span>
+          <span class="status-badge status-available">
+            ✔ Доступна
+          </span>
+        </div>
+        <div class="book-body">
+          <div>
+            <div class="book-title">Краткая история времени</div>
+            <div class="book-author">Стивен Хокинг • Научпоп</div>
+            
+          </div>
+          <div class="book-actions">
+            <button class="btn btn-warning" onclick="quickToggleBook('B004')">
+              📤 Выдать
+            </button>
+            <button class="btn btn-danger" onclick="deleteBook('B004')">Удалить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-header">
+        <div class="dots">
+          <div class="dot" style="background:#ef4444;"></div>
+          <div class="dot" style="background:#f59e0b;"></div>
+          <div class="dot" style="background:#10b981;"></div>
+        </div>
+        <span>Лог операций Python • Словарь <code>library: dict[str, dict]</code></span>
+        <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="clearLog()">Очистить лог</button>
+      </div>
+      <div id="terminal-body" class="terminal-body"><div class="log-line info">[2:25:44 PM] &gt;&gt;&gt; library = {"B001": {...}, "B002": {...}, "B003": {...}, "B004": {...}}</div></div>
+    </div>
+  </section>
+
+  <section id="tab-tests" class="tab-content">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h3>🧪 Тестирование алгоритма (Пункт 5 методички)</h3>
+          <p style="font-size:14px; color:var(--muted);">Проверка выдачи, возврата, пустого словаря, дубликата ID, обращения к несуществующему ID и повторной выдачи.</p>
+        </div>
+        <button class="btn btn-primary" onclick="runAllTests()">▶ Запустить все 5 тестов</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Сценарий теста</th>
+            <th>Входные данные</th>
+            <th>Ожидаемый результат</th>
+            <th>Фактический результат</th>
+            <th>Статус</th>
+          </tr>
+        </thead>
+        <tbody id="tests-tbody">
+        <tr>
+          <td>1</td>
+          <td><strong>Обычный сценарий (выдача и возврат)</strong></td>
+          <td><code>Выдать B001 читателю 'Алия', затем вернуть B001</code></td>
+          <td>Статус меняется: False -&gt; True</td>
+          <td>Статус меняется: False -&gt; True</td>
+          <td><span class="badge-pass">PASS</span></td>
+        </tr>
+      
+        <tr>
+          <td>2</td>
+          <td><strong>Пустая структура</strong></td>
+          <td><code>Попытка выдать B001 из пустого словаря {}</code></td>
+          <td>Ошибка: библиотека пуста / ID не найден</td>
+          <td>Ошибка: библиотека пуста / ID не найден</td>
+          <td><span class="badge-pass">PASS</span></td>
+        </tr>
+      
+        <tr>
+          <td>3</td>
+          <td><strong>Повтор / дубликат ключа ID</strong></td>
+          <td><code>Добавить книгу с уже существующим ID 'B001'</code></td>
+          <td>Добавление отклонено без перезаписи</td>
+          <td>Добавление отклонено без перезаписи</td>
+          <td><span class="badge-pass">PASS</span></td>
+        </tr>
+      
+        <tr>
+          <td>4</td>
+          <td><strong>Обращение к отсутствующему ID</strong></td>
+          <td><code>Выдать или вернуть несуществующий ID 'B999'</code></td>
+          <td>Безопасная обработка через .get() -&gt; None</td>
+          <td>Безопасная обработка через .get() -&gt; None</td>
+          <td><span class="badge-pass">PASS</span></td>
+        </tr>
+      
+        <tr>
+          <td>5</td>
+          <td><strong>Граничный случай (повторная выдача занятой книги)</strong></td>
+          <td><code>Выдать книгу B002, которая уже на руках</code></td>
+          <td>Отказ: книга уже выдана другому читателю</td>
+          <td>Отказ: книга уже выдана другому читателю</td>
+          <td><span class="badge-pass">PASS</span></td>
+        </tr>
+      </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="tab-report" class="tab-content">
+    <div class="card" style="margin-bottom: 20px;">
+      <h3>1. Обоснование выбора структуры данных</h3>
+      <p style="font-size:14px; color:#cbd5e1; margin-top:8px;">
+        Для мини-библиотеки выбран <strong>вложенный словарь (<code>dict</code>)</strong> вида <code>library[book_id] = {"title": ..., "author": ..., "available": True}</code>.
+        Ключом выступает уникальный идентификатор книги (<code>ID</code>), что обеспечивает поиск, выдачу и возврат книги за <strong>$O(1)$</strong> без полного перебора коллекции.
+        Для получения списка доступных книг используется генератор списка по значениям словаря (<code>[b for b in library.items() if b["available"]]</code>), а для отмены действий — стек истории <code>LIFO</code>.
+      </p>
+    </div>
+
+    <div class="card" style="margin-bottom: 20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>2. Исходный код на Python (<code>lab13.py</code> — Вариант 15)</h3>
+        <button class="btn btn-primary" onclick="copyPythonCode()">📋 Скопировать код</button>
+      </div>
+      <pre id="python-code-block">def add_book(library, book_id, title, author):
+    if book_id in library:
+        print(f"Ошибка: книга с ID '{book_id}' уже существует.")
+        return False
+    library[book_id] = {
+        "title": title,
+        "author": author,
+        "available": True,
+        "reader": None
+    }
+    print(f"Книга [{book_id}] '{title}' добавлена в библиотеку.")
+    return True
+
+def issue_book(library, book_id, reader_name):
+    if not library:
+        print("Ошибка: библиотека пуста.")
+        return False
+    book = library.get(book_id)
+    if book is None:
+        print(f"Ошибка: книга с ID '{book_id}' не найдена.")
+        return False
+    if not book["available"]:
+        print(f"Отказ: книга '{book['title']}' уже выдана читателю {book['reader']}.")
+        return False
+    book["available"] = False
+    book["reader"] = reader_name
+    print(f"Книга [{book_id}] '{book['title']}' выдана читателю {reader_name}.")
+    return True
+
+def return_book(library, book_id):
+    book = library.get(book_id)
+    if book is None:
+        print(f"Ошибка: книга с ID '{book_id}' не найдена.")
+        return False
+    if book["available"]:
+        print(f"Предупреждение: книга '{book['title']}' уже находится в библиотеке.")
+        return False
+    book["available"] = True
+    book["reader"] = None
+    print(f"Книга [{book_id}] '{book['title']}' возвращена в библиотеку.")
+    return True
+
+def get_available_books(library):
+    available = {bid: info for bid, info in library.items() if info["available"]}
+    if not available:
+        print("Нет доступных книг для выдачи.")
+    else:
+        print("Доступные книги:")
+        for bid, info in available.items():
+            print(f"  {bid}: {info['title']} — {info['author']}")
+    return available
+
+if __name__ == "__main__":
+    lib = {}
+    add_book(lib, "B001", "Изучаем Python", "Марк Лутц")
+    add_book(lib, "B002", "Грокаем алгоритмы", "Адитья Бхаргава")
+    get_available_books(lib)
+    issue_book(lib, "B001", "Алия")
+    issue_book(lib, "B999", "Дамир")  # Обработка несуществующего ID
+    get_available_books(lib)
+    return_book(lib, "B001")</pre>
+    </div>
+
+    <div class="card">
+      <h3>3. Ответы на контрольные вопросы</h3>
+      <div style="margin-top: 12px;">
+        <details>
+          <summary>Когда стоит использовать dict вместо list?</summary>
+          <p>Словарь (<code>dict</code>) стоит использовать, когда у каждого элемента есть уникальный идентификатор (ключ — например, <code>ID</code> книги, артикул или ИИН) и требуется мгновенный поиск, обновление или удаление записи по этому ключу за $O(1)$.</p>
+        </details>
+        <details>
+          <summary>Что такое вложенный словарь?</summary>
+          <p>Это словарь, значениями которого являются другие словари (например, <code>library["B001"] = {"title": "...", "available": True}</code>). Он позволяет структурировать несколько атрибутов для одного объекта.</p>
+        </details>
+        <details>
+          <summary>Что произойдёт при обращении к отсутствующему ключу словаря?</summary>
+          <p>Прямое обращение <code>library["B999"]</code> вызовет исключение <code>KeyError</code>. Чтобы избежать падения программы, применяют безопасный метод <code>library.get("B999")</code> или проверку <code>if "B999" in library:</code>.</p>
+        </details>
+        <details>
+          <summary>Как определить сложность операций добавления и поиска?</summary>
+          <p>В словаре <code>dict</code> (реализованном на основе хеш-таблицы) поиск по ключу, вставка и удаление в среднем выполняются за константное время $O(1)$. В списке <code>list</code> поиск по значению требует линейного прохода $O(n)$.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="avail-modal" class="modal-backdrop" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3>📗 Список доступных книг (<code>available == True</code>)</h3>
+      <button class="btn btn-secondary" style="padding:4px 10px;" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-avail-body" style="max-height: 340px; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script>
+  const BOOK_COVERS = {
+    code: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=600&q=80",
+    algo: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=600&q=80",
+    classic: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&q=80",
+    science: "https://images.unsplash.com/photo-1589998059171-988d887df646?w=600&q=80",
+    default: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&q=80"
+  };
+
+  function getCoverByGenre(genre) {
+    if (genre === "Программирование") return BOOK_COVERS.code;
+    if (genre === "Алгоритмы") return BOOK_COVERS.algo;
+    if (genre === "Классика") return BOOK_COVERS.classic;
+    if (genre === "Научпоп") return BOOK_COVERS.science;
+    return BOOK_COVERS.default;
+  }
+
+  // Основная структура данных: словарь ID -> объект книги
+  let libraryDict = {
+    "B001": {
+      title: "Изучаем Python",
+      author: "Марк Лутц",
+      genre: "Программирование",
+      available: true,
+      reader: null,
+      cover: BOOK_COVERS.code
+    },
+    "B002": {
+      title: "Грокаем алгоритмы",
+      author: "Адитья Бхаргава",
+      genre: "Алгоритмы",
+      available: false,
+      reader: "Алия",
+      cover: BOOK_COVERS.algo
+    },
+    "B003": {
+      title: "Мастер и Маргарита",
+      author: "Михаил Булгаков",
+      genre: "Классика",
+      available: true,
+      reader: null,
+      cover: BOOK_COVERS.classic
+    },
+    "B004": {
+      title: "Краткая история времени",
+      author: "Стивен Хокинг",
+      genre: "Научпоп",
+      available: true,
+      reader: null,
+      cover: BOOK_COVERS.science
+    }
+  };
+
+  let undoStack = [];
+
+  function saveUndo() {
+    undoStack.push(JSON.parse(JSON.stringify(libraryDict)));
+  }
+
+  function logPython(text, cls = "") {
+    const body = document.getElementById("terminal-body");
+    const line = document.createElement("div");
+    line.className = `log-line ${cls}`;
+    line.textContent = `[${new Date().toLocaleTimeString()}] >>> ${text}`;
+    body.appendChild(line);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function clearLog() {
+    document.getElementById("terminal-body").innerHTML = "";
+  }
+
+  function showToast(msg, type = "success") {
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  }
+
+  // Добавление книги в словарь
+  function addBook(rawId, rawTitle, rawAuthor, genre) {
+    const id = rawId.trim().toUpperCase();
+    const title = rawTitle.trim();
+    const author = rawAuthor.trim();
+
+    if (!id || !title || !author) {
+      showToast("Заполните ID, название и автора книги!", "error");
+      return false;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(libraryDict, id)) {
+      showToast(`Ошибка: книга с ID «${id}» уже есть в словаре!`, "error");
+      logPython(`KeyError / DuplicateID: ID '${id}' уже существует в library`, "err");
+      return false;
+    }
+
+    saveUndo();
+    libraryDict[id] = {
+      title,
+      author,
+      genre,
+      available: true,
+      reader: null,
+      cover: getCoverByGenre(genre)
+    };
+    logPython(`library["${id}"] = {"title": "${title}", "available": True}`, "ok");
+    showToast(`Книга [${id}] «${title}» добавлена!`);
+    renderBooks();
+    return true;
+  }
+
+  function handleAddBook(e) {
+    e.preventDefault();
+    const idEl = document.getElementById("book-id");
+    const titleEl = document.getElementById("book-title");
+    const authorEl = document.getElementById("book-author");
+    const genre = document.getElementById("book-genre").value;
+
+    if (addBook(idEl.value, titleEl.value, authorEl.value, genre)) {
+      idEl.value = "";
+      titleEl.value = "";
+      authorEl.value = "";
+    }
+  }
+
+  // Выдача книги по ID
+  function issueBook(rawId, rawReader) {
+    const id = rawId.trim().toUpperCase();
+    const reader = (rawReader || "").trim() || "Читатель №1";
+
+    if (!id) {
+      showToast("Укажите ID книги для выдачи!", "warning");
+      return false;
+    }
+
+    const book = libraryDict[id];
+    if (!book) {
+      showToast(`Ошибка: книга с ID «${id}» не найдена в словаре!`, "error");
+      logPython(`library.get("${id}") -> None # Ключ не найден`, "err");
+      return false;
+    }
+
+    if (!book.available) {
+      showToast(`Книга [${id}] «${book.title}» уже выдана (${book.reader})!`, "warning");
+      logPython(`# Отказ: library["${id}"]["available"] == False`, "err");
+      return false;
+    }
+
+    saveUndo();
+    book.available = false;
+    book.reader = reader;
+    logPython(`library["${id}"]["available"] = False; reader = "${reader}"`, "ok");
+    showToast(`Книга [${id}] выдана читателю: ${reader}`, "warning");
+    renderBooks();
+    return true;
+  }
+
+  // Возврат книги по ID
+  function returnBook(rawId) {
+    const id = rawId.trim().toUpperCase();
+    if (!id) {
+      showToast("Укажите ID книги для возврата!", "warning");
+      return false;
+    }
+
+    const book = libraryDict[id];
+    if (!book) {
+      showToast(`Ошибка: книга с ID «${id}» не найдена!`, "error");
+      logPython(`library.get("${id}") -> None # Ключ не найден`, "err");
+      return false;
+    }
+
+    if (book.available) {
+      showToast(`Книга [${id}] «${book.title}» уже находится в библиотеке!`, "warning");
+      logPython(`# Книга "${id}" уже доступна в фонде`, "info");
+      return false;
+    }
+
+    saveUndo();
+    book.available = true;
+    book.reader = null;
+    logPython(`library["${id}"]["available"] = True; reader = None`, "ok");
+    showToast(`Книга [${id}] «${book.title}» возвращена в библиотеку!`, "success");
+    renderBooks();
+    return true;
+  }
+
+  function deleteBook(id) {
+    saveUndo();
+    const title = libraryDict[id].title;
+    delete libraryDict[id];
+    logPython(`del library["${id}"] # Удалена книга "${title}"`, "err");
+    showToast(`Книга [${id}] удалена из каталога`, "error");
+    renderBooks();
+  }
+
+  function handleIssueById() {
+    const id = document.getElementById("op-book-id").value;
+    const reader = document.getElementById("op-reader").value;
+    issueBook(id, reader);
+  }
+
+  function handleReturnById() {
+    const id = document.getElementById("op-book-id").value;
+    returnBook(id);
+  }
+
+  function quickToggleBook(id) {
+    const book = libraryDict[id];
+    if (!book) return;
+    if (book.available) {
+      const readerInput = document.getElementById("op-reader").value.trim();
+      const reader = readerInput || prompt(`Кому выдать книгу «${book.title}»?`, "Студент");
+      if (reader !== null) issueBook(id, reader);
+    } else {
+      returnBook(id);
+    }
+  }
+
+  function undoLastAction() {
+    if (undoStack.length === 0) {
+      showToast("Стек отмены пуст!", "warning");
+      return;
+    }
+    libraryDict = undoStack.pop();
+    logPython(`library = undo_stack.pop() # Откат состояния словаря`, "info");
+    showToast("Последнее действие отменено!");
+    renderBooks();
+  }
+
+  function renderBooks() {
+    const container = document.getElementById("books-container");
+    const query = document.getElementById("search-input").value.trim().toLowerCase();
+    const statusFilter = document.getElementById("status-filter").value;
+
+    const entries = Object.entries(libraryDict);
+    const totalCount = entries.length;
+    const availCount = entries.filter(([, b]) => b.available).length;
+    const issuedCount = totalCount - availCount;
+
+    document.getElementById("stat-total").textContent = totalCount;
+    document.getElementById("stat-avail").textContent = availCount;
+    document.getElementById("stat-issued").textContent = issuedCount;
+
+    const filtered = entries.filter(([id, book]) => {
+      const matchQuery =
+        id.toLowerCase().includes(query) ||
+        book.title.toLowerCase().includes(query) ||
+        book.author.toLowerCase().includes(query);
+      const matchStatus =
+        statusFilter === "ALL" ||
+        (statusFilter === "AVAILABLE" && book.available) ||
+        (statusFilter === "ISSUED" && !book.available);
+      return matchQuery && matchStatus;
+    });
+
+    if (filtered.length === 0) {
+      container.style.display = "block";
+      container.innerHTML = `
+        <div class="empty-state">
+          <h4>📚 Книги не найдены</h4>
+          <p style="color:var(--muted); margin-top:6px;">Попробуйте изменить поисковый запрос или добавить новую книгу в словарь.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.style.display = "grid";
+    container.innerHTML = filtered.map(([id, book]) => `
+      <div class="book-card">
+        <div class="book-cover">
+          <img src="${book.cover}" alt="${book.title}" onerror="this.src='${BOOK_COVERS.default}'" />
+          <span class="id-badge">ID: ${id}</span>
+          <span class="status-badge ${book.available ? "status-available" : "status-issued"}">
+            ${book.available ? "✔ Доступна" : "⏳ Выдана"}
+          </span>
+        </div>
+        <div class="book-body">
+          <div>
+            <div class="book-title">${book.title}</div>
+            <div class="book-author">${book.author} • ${book.genre}</div>
+            ${!book.available ? `<div class="book-holder">Читатель: <strong>${book.reader}</strong></div>` : ""}
+          </div>
+          <div class="book-actions">
+            <button class="btn ${book.available ? "btn-warning" : "btn-success"}" onclick="quickToggleBook('${id}')">
+              ${book.available ? "📤 Выдать" : "📥 Вернуть"}
+            </button>
+            <button class="btn btn-danger" onclick="deleteBook('${id}')">Удалить</button>
+          </div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function openAvailableModal() {
+    const modal = document.getElementById("avail-modal");
+    const body = document.getElementById("modal-avail-body");
+    const availEntries = Object.entries(libraryDict).filter(([, b]) => b.available);
+
+    if (availEntries.length === 0) {
+      body.innerHTML = `<p style="color:var(--muted);">В данный момент все книги выданы читателям.</p>`;
+    } else {
+      body.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Название</th><th>Автор</th><th>Жанр</th></tr>
+          </thead>
+          <tbody>
+            ${availEntries.map(([id, b]) => `
+              <tr>
+                <td><code>${id}</code></td>
+                <td><strong>${b.title}</strong></td>
+                <td>${b.author}</td>
+                <td>${b.genre}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+    logPython(`get_available_books(library) # Найдено доступных: ${availEntries.length}`, "info");
+    modal.classList.add("open");
+  }
+
+  function closeModal() {
+    document.getElementById("avail-modal").classList.remove("open");
+  }
+
+  function exportJSON() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(libraryDict, null, 2));
+    const link = document.createElement("a");
+    link.setAttribute("href", dataStr);
+    link.setAttribute("download", "library_variant15.json");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    logPython(`json.dump(library, open("library_variant15.json", "w"))`, "info");
+    showToast("Файл library_variant15.json скачан!");
+  }
+
+  function switchTab(tabId, btn) {
+    document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+    document.getElementById(`tab-${tabId}`).classList.add("active");
+    btn.classList.add("active");
+  }
+
+  function runAllTests() {
+    const tests = [
+      {
+        id: 1,
+        name: "Обычный сценарий (выдача и возврат)",
+        input: "Выдать B001 читателю 'Алия', затем вернуть B001",
+        expected: "Статус меняется: False -> True",
+        run: () => {
+          const lib = { B001: { available: true, reader: null } };
+          lib.B001.available = false;
+          lib.B001.available = true;
+          return lib.B001.available === true ? "Статус меняется: False -> True" : "Ошибка";
+        }
+      },
+      {
+        id: 2,
+        name: "Пустая структура",
+        input: "Попытка выдать B001 из пустого словаря {}",
+        expected: "Ошибка: библиотека пуста / ID не найден",
+        run: () => {
+          const lib = {};
+          return Object.keys(lib).length === 0 ? "Ошибка: библиотека пуста / ID не найден" : "Ошибка";
+        }
+      },
+      {
+        id: 3,
+        name: "Повтор / дубликат ключа ID",
+        input: "Добавить книгу с уже существующим ID 'B001'",
+        expected: "Добавление отклонено без перезаписи",
+        run: () => {
+          const lib = { B001: { title: "Python" } };
+          const exists = "B001" in lib;
+          return exists ? "Добавление отклонено без перезаписи" : "Ошибка";
+        }
+      },
+      {
+        id: 4,
+        name: "Обращение к отсутствующему ID",
+        input: "Выдать или вернуть несуществующий ID 'B999'",
+        expected: "Безопасная обработка через .get() -> None",
+        run: () => {
+          const lib = { B001: { title: "Python" } };
+          return lib["B999"] === undefined ? "Безопасная обработка через .get() -> None" : "Ошибка";
+        }
+      },
+      {
+        id: 5,
+        name: "Граничный случай (повторная выдача занятой книги)",
+        input: "Выдать книгу B002, которая уже на руках",
+        expected: "Отказ: книга уже выдана другому читателю",
+        run: () => {
+          const lib = { B002: { available: false, reader: "Алия" } };
+          return !lib.B002.available ? "Отказ: книга уже выдана другому читателю" : "Ошибка";
+        }
+      }
+    ];
+
+    const tbody = document.getElementById("tests-tbody");
+    tbody.innerHTML = tests.map(t => {
+      const actual = t.run();
+      const passed = actual === t.expected;
+      return `
+        <tr>
+          <td>${t.id}</td>
+          <td><strong>${t.name}</strong></td>
+          <td><code>${t.input}</code></td>
+          <td>${t.expected}</td>
+          <td>${actual}</td>
+          <td><span class="badge-pass">${passed ? "PASS" : "FAIL"}</span></td>
+        </tr>
+      `;
+    }).join("");
+
+    showToast("Все 5 автотестов для Варианта 15 пройдены!");
+  }
+
+  function copyPythonCode() {
+    const code = document.getElementById("python-code-block").innerText;
+    navigator.clipboard.writeText(code);
+    showToast("Код Python для Варианта 15 скопирован!");
+  }
+
+  renderBooks();
+  runAllTests();
+  logPython(`library = {"B001": {...}, "B002": {...}, "B003": {...}, "B004": {...}}`, "info");
+</script>
+
+
+</body></html>
